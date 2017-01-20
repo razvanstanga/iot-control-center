@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IoT Control Center</title>
+</head>
+<script type="text/javascript" src="assets/js/mqtt.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js">
+</script>
+<body>
+    <div class="container"></div>
+</body>
+
+<script type="text/javascript">
+    jQuery.fn.exists = function(){return ($(this).length > 0);}
+    function formatTopic(topic)
+    {
+        return topic.replace(/\//gi, '_').replace(/:/gi, '_').replace('_status', '');
+    }
+
+    var clientId = 'A75BDC00-9876-470B-85F6-28194F13B88C';
+    var host = 'ws://192.168.0.50:10000'
+    var options = {
+        keepalive: 10,
+        clientId: clientId,
+        protocolId: 'MQTT',
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 1000,
+        connectTimeout: 30 * 1000,
+        will: {
+            topic: '/lwt',
+            payload: 'Connection Closed abnormally..!',
+            qos: 2,
+            retain: true
+        },
+        username: 'iot',
+        password: 'iot',
+        rejectUnauthorized: false
+    };
+
+    var client = mqtt.connect(host, options);
+
+    client.on('error', function (err) {
+        console.log(err);
+        client.end();
+    });
+
+    client.on('connect', function () {
+        console.log('client connected:' + clientId);
+    });
+
+    client.subscribe('/IoTmanager/+/config', {qos: 1});
+    client.subscribe('/IoTmanager/+/+/status', {qos: 1});
+    client.subscribe('/IoTmanager/+/response', {qos: 1});
+
+    client.publish('/IoTmanager/' + clientId + '/request', '{"command":"getPages","param":""}', { qos: 1, retained: false });
+
+    client.on('message', function (topic, message, packet) {
+        //console.log('Received Message:= ' + message.toString() + '\nOn topic:= ' + topic)
+        var topicArr = topic.split('/');
+        if (topicArr[3] == 'config') {
+            console.log('Received config:= ' + message.toString() + '\nOn topic:= ' + topic)
+            var json = JSON.parse(message.toString());
+            var id = formatTopic(json.topic);
+            if (json.widget == 'toggle') {
+                if ($('.' + id).exists() == false) {
+                    $('.container').prepend('<input type="checkbox" class="' + id +'" value="">');
+                    $('.' + id).click(function(){
+                        if ($(this).attr('checked') == 'checked') {
+                            $(this).attr('checked', '');
+                            client.publish(json.topic + '/control', '0', { qos: 1, retained: false });
+                        } else {
+                            $(this).attr('checked', 'checked');
+                            client.publish(json.topic + '/control', '1', { qos: 1, retained: false });
+                        }
+                    });
+                }
+            }
+        } else if (topicArr[4] == 'status') {
+            console.log('Received status:= ' + message.toString() + '\nOn topic:= ' + topic)
+            var json = JSON.parse(message.toString());
+            var id = formatTopic(topic);
+            if ($('.' + id).exists() == true) {
+                if (json.status == 1) {
+                    $('.' + id).attr('checked', 'checked');
+                } else if ( json.status == 0 ) {
+                    $('.' + id).attr('checked', false);
+                }
+            }
+        } else if (topicArr[3] == 'response') {
+            console.log('Received response:= ' + message.toString() + '\nOn topic:= ' + topic)
+            var json = JSON.parse(message.toString());
+            $(json.pages).each(function(k,v){
+                client.publish('/IoTmanager/' + clientId +  '/request', '{"command":"getPageById","param":"' + v.pageId + '"}', { qos: 1, retained: false });
+            });
+        }
+    })
+
+    client.on('close', function () {
+        console.log(clientId + ' disconnected')
+    })
+</script>
+</html>
