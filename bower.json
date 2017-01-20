@@ -1,0 +1,21 @@
+{
+  "name": "iot-control-center.git",
+  "authors": [
+    "Razvan Stanga <git@razvi.ro>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "onsenui": "^2.0.5"
+  }
+}

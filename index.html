@@ -2,19 +2,84 @@
 <html>
 <head>
     <title>IoT Control Center</title>
+    <script type="text/javascript" src="assets/js/mqtt.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="bower_components/onsenui/js/onsenui.min.js"></script>
+    <link rel="stylesheet" href="bower_components/onsenui/css/onsenui.css"/>
+    <link rel="stylesheet" href="bower_components/onsenui/css/onsen-css-components-blue-theme.css"/>
+    <script>
+        //ons.bootstrap();
+    </script>
 </head>
-<script type="text/javascript" src="assets/js/mqtt.min.js"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js">
-</script>
 <body>
-    <div class="container"></div>
+<div class="navigation-bar">
+  <div class="navigation-bar__left">
+    <span class="toolbar-button--quiet">
+      <i class="ion-navicon" style="font-size:32px; vertical-align:-6px;"></i>
+    </span>
+  </div>
+
+  <div class="navigation-bar__center">
+    IoT Control Center
+  </div>
+
+  <div class="navigation-bar__right">
+
+  </div>
+</div>
+
+<!-- Prerequisite=This example use ionicons(http://ionicons.com) to display icons. -->
+<div class="tab-bar pages">
+  <label class="tab-bar__item pagall">
+    <input type="radio" name="tab-bar-a" checked="checked">
+    <button class="tab-bar__button">
+      <i class="tab-bar__icon ion-stop"></i>
+      <div class="tab-bar__label">All devices</div>
+    </button>
+  </label>
+</div>
+
+<div class="content"></div>
+    <ul class="list container">
+
+    </ul>
 </body>
 
 <script type="text/javascript">
     jQuery.fn.exists = function(){return ($(this).length > 0);}
+    $('.pagall').click(function(){
+        $('.pag').show();
+    });
     function formatTopic(topic)
     {
         return topic.replace(/\//gi, '_').replace(/:/gi, '_').replace('_status', '');
+    }
+    function listify(label, pageId, button)
+    {
+        var html = '';
+        html += '<ul class="list pag pag' + pageId +'">';
+        html += '<li class="list__item">';
+        html += '<div class="list__item__center">';
+        html += label;
+        html += '</div>';
+        html += '<div class="list__item__right">';
+        html += button;
+        html += '</div>';
+        html += '</li>';
+        html += '</ul>';
+        return html;
+    }
+    function addPage(pageName, pageId)
+    {
+        var html = '';
+        html += '<label class="tab-bar__item page" page="' + pageId +'">';
+        html += '<input type="radio" name="tab-bar-a">';
+        html += '<button class="tab-bar__button">';
+        html += '<i class="tab-bar__icon ion-star"></i>';
+        html += '<div class="tab-bar__label">' + pageName + '</div>';
+        html += '</button>';
+        html += '</label>';
+        return html;
     }
 
     var clientId = 'A75BDC00-9876-470B-85F6-28194F13B88C';
@@ -64,7 +129,8 @@
             var id = formatTopic(json.topic);
             if (json.widget == 'toggle') {
                 if ($('.' + id).exists() == false) {
-                    $('.container').prepend('<input type="checkbox" class="' + id +'" value="">');
+                    //$('.container').prepend('<input type="checkbox" class="' + id +'" value="">');
+                    $('.container').prepend(listify(json.descr, json.pageId, '<label class="switch"><input type="checkbox" class="' + id +' switch__input"><div class="switch__toggle"><div class="switch__handle"></div></div></label>'));
                     $('.' + id).click(function(){
                         if ($(this).attr('checked') == 'checked') {
                             $(this).attr('checked', '');
@@ -91,6 +157,11 @@
             console.log('Received response:= ' + message.toString() + '\nOn topic:= ' + topic)
             var json = JSON.parse(message.toString());
             $(json.pages).each(function(k,v){
+                $('.pages').append(addPage(v.pageName, v.pageId));
+                $('.page').click(function(){
+                    $('.pag').hide();
+                    $('.pag' + $(this).attr('page')).show();
+                });
                 client.publish('/IoTmanager/' + clientId +  '/request', '{"command":"getPageById","param":"' + v.pageId + '"}', { qos: 1, retained: false });
             });
         }
