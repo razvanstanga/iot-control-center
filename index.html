@@ -3,6 +3,7 @@
 <head>
     <title>IoT Control Center</title>
     <script type="text/javascript" src="assets/js/mqtt.min.js"></script>
+    <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="bower_components/onsenui/js/onsenui.min.js"></script>
     <link rel="stylesheet" href="bower_components/onsenui/css/onsenui.css"/>
@@ -82,11 +83,10 @@
         return html;
     }
 
-    var clientId = 'A75BDC00-9876-470B-85F6-28194F13B88C';
-    var host = 'ws://192.168.0.50:10000'
+    var host = 'ws://' + mqttConfig.host + ':' + mqttConfig.port;
     var options = {
         keepalive: 10,
-        clientId: clientId,
+        clientId: mqttConfig.clientId,
         protocolId: 'MQTT',
         protocolVersion: 4,
         clean: true,
@@ -98,8 +98,8 @@
             qos: 2,
             retain: true
         },
-        username: 'iot',
-        password: 'iot',
+        username: mqttConfig.user,
+        password: mqttConfig.pass,
         rejectUnauthorized: false
     };
 
@@ -111,14 +111,14 @@
     });
 
     client.on('connect', function () {
-        console.log('client connected:' + clientId);
+        console.log('client connected:' + mqttConfig.clientId);
     });
 
     client.subscribe('/IoTmanager/+/config', {qos: 1});
     client.subscribe('/IoTmanager/+/+/status', {qos: 1});
     client.subscribe('/IoTmanager/+/response', {qos: 1});
 
-    client.publish('/IoTmanager/' + clientId + '/request', '{"command":"getPages","param":""}', { qos: 1, retained: false });
+    client.publish('/IoTmanager/' + mqttConfig.clientId + '/request', '{"command":"getPages","param":""}', { qos: 1, retained: false });
 
     client.on('message', function (topic, message, packet) {
         //console.log('Received Message:= ' + message.toString() + '\nOn topic:= ' + topic)
@@ -162,13 +162,13 @@
                     $('.pag').hide();
                     $('.pag' + $(this).attr('page')).show();
                 });
-                client.publish('/IoTmanager/' + clientId +  '/request', '{"command":"getPageById","param":"' + v.pageId + '"}', { qos: 1, retained: false });
+                client.publish('/IoTmanager/' + mqttConfig.clientId +  '/request', '{"command":"getPageById","param":"' + v.pageId + '"}', { qos: 1, retained: false });
             });
         }
     })
 
     client.on('close', function () {
-        console.log(clientId + ' disconnected')
+        console.log(mqttConfig.clientId + ' disconnected')
     })
 </script>
 </html>
