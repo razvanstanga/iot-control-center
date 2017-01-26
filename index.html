@@ -2,16 +2,19 @@
 <html>
 <head>
     <title>IoT Control Center</title>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="assets/js/mqtt.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="assets/js/iotcc.js"></script>
     <script type="text/javascript" src="bower_components/onsenui/js/onsenui.min.js"></script>
+    <script type="text/javascript" src="bower_components/onsenui/js/angular-onsenui.min.js"></script>
+    <script>
+      ons.bootstrap();
+    </script>
+
     <link rel="stylesheet" href="bower_components/onsenui/css/onsenui.css"/>
     <link rel="stylesheet" href="bower_components/onsenui/css/onsen-css-components-blue-theme.css"/>
-    <script>
-        //ons.bootstrap();
-    </script>
 </head>
 <body>
 <div class="navigation-bar">
@@ -26,11 +29,9 @@
   </div>
 
   <div class="navigation-bar__right">
-
   </div>
 </div>
 
-<!-- Prerequisite=This example use ionicons(http://ionicons.com) to display icons. -->
 <div class="tab-bar pages">
   <label class="tab-bar__item pagall">
     <input type="radio" name="tab-bar-a" checked="checked">
@@ -42,6 +43,7 @@
 </div>
 
 <div class="content"></div>
-    <ul class="list container"></ul>
+<ul class="list container"></ul>
+
 </body>
 </html>

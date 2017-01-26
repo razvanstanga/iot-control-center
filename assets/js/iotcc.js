@@ -27,6 +27,9 @@
             };
             this.mqttConfig = Object.assign(mqttConfig, this.mqttConfig);
             this.init();
+            if (this.mqttConfig.simulateDevices) {
+                this.simulateDevices();
+            }
         }
 
         init() {
@@ -41,93 +44,116 @@
                 console.log('client connected:' + mqttConfig.clientId);
             });
 
-            this.client.subscribe('/IoTmanager/+/config', {qos: 1});
-            this.client.subscribe('/IoTmanager/+/+/status', {qos: 1});
-            this.client.subscribe('/IoTmanager/+/response', {qos: 1});
-
-            this.client.publish('/IoTmanager/' + mqttConfig.clientId + '/request', '{"command":"getPages","param":""}', { qos: 1, retained: false });
+            this.client.subscribe('/iotcc/+/+/config', {qos: 1});
+            this.client.subscribe('/iotcc/+/+/data', {qos: 1});
+            this.client.subscribe('/iotcc/+/device', {qos: 1});
 
             this.client.on('message', function (topic, message, packet) {
-                //console.log('Received Message:= ' + message.toString() + '\nOn topic:= ' + topic)
+                //console.log('Received Message:= ' + message.toString() + '\nOn topic:= ' + topic);
                 var topicPath = topic.split('/');
-                if (topicPath[3] == 'config') {
-                    console.log('Received config:= ' + message.toString() + '\nOn topic:= ' + topic)
+                if (topicPath[4] == 'config') {
+                    console.log('Received config:= ' + message.toString() + '\nOn topic:= ' + topic);
                     var json = JSON.parse(message.toString());
-                    var id = iotCC.formatTopic(json.topic);
+                    var widgetClass = iotCC.formatTopic(json.topic);
                     if (json.widget == 'toggle') {
-                        if ($('.' + id).exists() == false) {
-                            //$('.container').prepend('<input type="checkbox" class="' + id +'" value="">');
-                            $('.container').prepend(iotCC.addList(json.descr, json.pageId, '<label class="switch"><input type="checkbox" class="' + id +' switch__input"><div class="switch__toggle"><div class="switch__handle"></div></div></label>'));
-                            $('.' + id).click(function(){
-                                if ($(this).attr('checked') == 'checked') {
-                                    $(this).attr('checked', '');
-                                    client.publish(json.topic + '/control', '0', { qos: 1, retained: false });
+                        if ($('.' + widgetClass).exists() == false) {
+                            var html = '<label class="switch"><input type="checkbox" class="' + widgetClass + 'click switch__input" ' + (json.checked==true?'checked="checked" status="1"':'status="0"') + '><div class="switch__toggle"><div class="switch__handle"></div></div></label>';
+                            iotCC.addList(json, html, widgetClass);
+                            $('.' + widgetClass + 'click').click(function(){
+                                if ($(this).attr('checked')) {
+                                    $(this).removeAttr('checked').attr('status', 0);
+                                    client.publish(json.topic + '/data', '{"status":0}', {qos: 1, retained: false});
                                 } else {
-                                    $(this).attr('checked', 'checked');
-                                    client.publish(json.topic + '/control', '1', { qos: 1, retained: false });
+                                    $(this).attr('checked', 'checked').attr('status', 1);
+                                    client.publish(json.topic + '/data', '{"status":1}', {qos: 1, retained: false});
                                 }
                             });
                         }
-                    }
-                } else if (topicPath[4] == 'status') {
-                    console.log('Received status:= ' + message.toString() + '\nOn topic:= ' + topic)
-                    var json = JSON.parse(message.toString());
-                    var id = iotCC.formatTopic(topic);
-                    if ($('.' + id).exists() == true) {
-                        if (json.status == 1) {
-                            $('.' + id).attr('checked', 'checked');
-                        } else if ( json.status == 0 ) {
-                            $('.' + id).attr('checked', false);
+                    } else if (json.widget == 'list') {
+                        var html = '';
+                        $(json.options).each(function(k,v){
+                            html += '<label class="radio-button radio-button--material ' + widgetClass + 'click" data-status="' + v.status + '"><input type="radio" class="radio-button__input radio-button--material__input" name="r" ' + (v.checked==true?'checked="checked"':'') + '><div class="radio-button__checkmark radio-button--material__checkmark"></div>'+ v.label +'</label>';
+                        });
+                        if ($('.' + widgetClass).exists() == false) {
+                            iotCC.addList(json, html, widgetClass);
+                            $('.' + widgetClass + 'click').click(function(){
+                                client.publish(json.topic + '/data', '{"status":"' + $(this).data('status') + '"}', {qos: 1, retained: false});
+                            });
                         }
                     }
-                } else if (topicPath[3] == 'response') {
-                    console.log('Received response:= ' + message.toString() + '\nOn topic:= ' + topic)
+                } else if (topicPath[4] == 'data') {
+                    console.log('Received data:= ' + message.toString() + '\nOn topic:= ' + topic);
+                    var json = JSON.parse(message.toString());
+                    var widgetClass = iotCC.formatTopic(topic);
+                    if ($('.' + widgetClass + 'click').filter('[data-status="' + json.status + '"]').exists() == true) {
+                        $('.' + widgetClass + 'click').find('input').removeAttr('checked');
+                        $('.' + widgetClass + 'click').filter('[data-status="' + json.status + '"]').find('input').attr('checked', 'checked');
+                    } else if ($('.' + widgetClass + 'click').exists() == true) {
+                        $('.' + widgetClass + 'click').attr('checked', 'checked');
+                    }
+                } else if (topicPath[3] == 'device') {
+                    console.log('Received device:= ' + message.toString() + '\nOn topic:= ' + topic);
                     var json = JSON.parse(message.toString());
                     $(json.pages).each(function(k,page){
-                        $('.pages').append(iotCC.addPage(page));
-                        $('.page').click(function(){
-                            $('.pag').hide();
-                            $('.pag' + $(this).attr('page')).show();
-                        });
-                        client.publish('/IoTmanager/' + mqttConfig.clientId +  '/request', '{"command":"getPageById","param":"' + page.pageId + '"}', { qos: 1, retained: false });
+                        if ($('label.page' + page.pageId).exists() == false) {
+                            $('.pages').append(iotCC.addPage(page));
+                            $('.page').click(function(){
+                                $('.pag').hide();
+                                $('.pag' + $(this).attr('page')).show();
+                            });
+                        }
                     });
                 }
             });
 
             this.client.on('close', function () {
-                console.log(mqttConfig.clientId + ' disconnected')
+                console.log(mqttConfig.clientId + ' disconnected');
             });
         }
 
-        static formatTopic(topic) {
-            return topic.replace(/\//gi, '_').replace(/:/gi, '_').replace('_status', '');
+        simulateDevices() {
+            //this.client.subscribe('/iotcc/+/+/data', {qos: 1});
+            this.client.publish('/iotcc/' + mqttConfig.clientId + '/device', '{"command":"getDevice","param":""}', {qos: 1, retained: false});
+            this.client.publish('/iotcc/relays/device', '{"name":"2 relays","desc":"on a board", "pages" : [{"pageId" : 10, "pageName" : "Page 1"}, {"pageId" : 20, "pageName" : "Page 2"}]}', {qos: 1, retained: false});
+            this.client.publish('/iotcc/relays/toggle1/config', '{"id":"1", "page": "Page 1", "pageId": 10, "widget":"toggle", "label":"Relay 1", "topic":"/iotcc/relays/toggle1", "checked":true}', {qos: 1, retained: false});
+            this.client.publish('/iotcc/relays/toggle2/config', '{"id":"2", "page": "Page 2", "pageId": 20, "widget":"toggle", "label":"Relay 2", "topic":"/iotcc/relays/toggle2"}', {qos: 1, retained: false});
+
+            //this.client.publish('/iotcc/relays1/device', '{"name":"2 relays","desc":"on a board", "pages" : [{"pageId" : 10, "pageName" : "Page 1"}, {"pageId" : 20, "pageName" : "Page 2"}]}', {qos: 1, retained: false});
+            //this.client.publish('/iotcc/relays1/toggle1/config', '{"id":"10", "page": "Page 1", "pageId": 10, "widget":"toggle", "descr":"Relay 1", "topic":"/iotcc/relays1/toggle1"}', {qos: 1, retained: false});
+            //this.client.publish('/iotcc/relays1/toggle2/config', '{"id":"11", "page": "Page 2", "pageId": 20, "widget":"toggle", "descr":"Relay 2", "topic":"/iotcc/relays1/toggle2"}', {qos: 1, retained: false});
+            //
+            this.client.publish('/iotcc/heater1/heater1/config', '{"id":"100", "page": "Page 1", "pageId": 10, "widget":"list", "label":"Header 1", "topic":"/iotcc/relays/heater1", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}]}', {qos: 1, retained: false});
         }
 
-        static addList(label, pageId, button) {
+        static formatTopic(topic) {
+            return topic.replace(/\//gi, '_').replace(/:/gi, '_').replace('_data', '');
+        }
+
+        static addList(json, content, widgetClass) {
             var html = '';
-            html += '<ul class="list pag pag' + pageId +'">';
+            html += '<ul class="list pag pag' + json.pageId +' ' + widgetClass +'">';
             html += '<li class="list__item">';
             html += '<div class="list__item__center">';
-            html += label;
+            html += json.label;
             html += '</div>';
             html += '<div class="list__item__right">';
-            html += button;
+            html += content;
             html += '</div>';
             html += '</li>';
             html += '</ul>';
-            return html;
+            $('.content').prepend(html);
         }
 
         static addPage(page) {
             var html = '';
-            html += '<label class="tab-bar__item page" page="' + page.pageId +'">';
+            html += '<label class="tab-bar__item page page' + page.pageId +'" page="' + page.pageId +'">';
             html += '<input type="radio" name="tab-bar-a">';
             html += '<button class="tab-bar__button">';
             html += '<i class="tab-bar__icon ' + ((page.icon!=undefined)?page.icon:'ion-star') + '"></i>';
             html += '<div class="tab-bar__label">' + page.pageName + '</div>';
             html += '</button>';
             html += '</label>';
-            return html;
+            $('.pages').append(html);
         }
     }
     new iotCC(mqttConfig);
