@@ -1,47 +1,246 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>IoT Control Center</title>
-    <script type="text/javascript" src="assets/js/mqtt.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script type="text/javascript" src="config.js"></script>
-    <script type="text/javascript" src="assets/js/iotcc.js"></script>
-    <script type="text/javascript" src="bower_components/onsenui/js/onsenui.min.js"></script>
-    <script>
-      //ons.bootstrap();
-    </script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>IoT Control Center</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 
-    <link rel="stylesheet" href="bower_components/onsenui/css/onsenui.css"/>
-    <link rel="stylesheet" href="bower_components/onsenui/css/onsen-css-components-blue-theme.css"/>
+  <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/skins/_all-skins.min.css">
+  <link rel="stylesheet" href="assets/css/iotcc.css">
 </head>
-<body>
-<div class="navigation-bar">
-  <div class="navigation-bar__left">
-    <span class="toolbar-button--quiet">
-      <i class="ion-navicon" style="font-size:32px; vertical-align:-6px;"></i>
-    </span>
-  </div>
 
-  <div class="navigation-bar__center">
-    IoT Control Center
-  </div>
+<body class="hold-transition skin-yellow sidebar-mini sidebar-collapse">
+<div class="wrapper">
+    <header class="main-header">
+    <!-- Logo -->
+    <a href="#dashboard" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>IoT</b></span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>IoT</b> Control Center</span>
+    </a>
 
-  <div class="navigation-bar__right">
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      <!-- Navbar Right Menu -->
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <!-- Control Sidebar Toggle Button -->
+          <li>
+            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gear"></i></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- /.search form -->
+      <!-- sidebar menu: : style can be found in sidebar.less -->
+      <ul class="sidebar-menu">
+        <!--li class="header">Options</li-->
+        <li class="active">
+            <a href="#" class="navigation" data-section="dashboard">
+                <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="navigation" data-section="settings">
+                <i class="fa fa-gears"></i> <span>Settings</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="navigation" data-section="log">
+                <i class="fa fa-align-justify"></i> <span>Log</span>
+            </a>
+        </li>
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <section class="content-header" data-section="dashboard">
+        <h1>Dashboard</h1>
+        <ol class="breadcrumb">
+            <li class="active"><i class="fa fa-dashboard"></i> Dashboard</li>
+        </ol>
+        <div class="">
+          <div class="tab-bar tab-bar--top tab-bar--material pagination">
+            <label class="tab-bar__item tab-bar--material__item" data-pagination="0">
+              <input type="radio" name="tab-bar-material-a" checked="checked">
+              <button class="tab-bar__button tab-bar--material__button">
+                <i class="tab-bar__icon tab-bar--material__icon ion-drag"></i>
+                <div class="tab-bar__label tab-bar--material__label">All</div>
+              </button>
+            </label>
+          </div>
+        </div>
+    </section>
+
+    <section class="content-header hide" data-section="settings">
+        <h1>Settings</h1>
+        <ol class="breadcrumb">
+            <li class="active"><i class="fa fa-gears"></i> Settings</li>
+        </ol>
+    </section>
+
+    <section class="content-header hide" data-section="log">
+        <h1>Log</h1>
+        <ol class="breadcrumb">
+            <li class="active"><i class="fa fa-gears"></i> Logs</li>
+        </ol>
+    </section>
+
+    <!-- Dashboard content -->
+    <section class="content" data-section="dashboard">
+
+    </section>
+
+    <!-- Settings content -->
+    <section class="content hide" data-section="settings">
+
+    </section>
+    <!-- /.content -->
+
+    <!-- Log content -->
+    <section class="content hide" data-section="log">
+      <pre class="console"></pre>
+    </section>
+    <!-- /.content -->
+
   </div>
+  <!-- /.content-wrapper -->
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      <b>Version</b> 0.1
+    </div>
+    <strong>Copyright &copy; 2017 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Create the tabs -->
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gear"></i></a></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <!-- Home tab content -->
+      <div class="tab-pane" id="control-sidebar-home-tab">
+
+      </div>
+      <!-- /.tab-pane -->
+
+      <!-- Settings tab content -->
+      <div class="tab-pane" id="control-sidebar-settings-tab">
+        <form method="post">
+          <h3 class="control-sidebar-heading">General Settings</h3>
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Report panel usage
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+
+            <p>
+              Some information about this general settings option
+            </p>
+          </div>
+          <!-- /.form-group -->
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Allow mail redirect
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+
+            <p>
+              Other sets of options are available
+            </p>
+          </div>
+          <!-- /.form-group -->
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Expose author name in posts
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+
+            <p>
+              Allow the user to show his name in blog posts
+            </p>
+          </div>
+          <!-- /.form-group -->
+
+          <h3 class="control-sidebar-heading">Chat Settings</h3>
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Show me as online
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+          </div>
+          <!-- /.form-group -->
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Turn off notifications
+              <input type="checkbox" class="pull-right">
+            </label>
+          </div>
+          <!-- /.form-group -->
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Delete chat history
+              <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
+            </label>
+          </div>
+          <!-- /.form-group -->
+        </form>
+      </div>
+      <!-- /.tab-pane -->
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+  <!-- Add the sidebar's background. This div must be placed
+       immediately after the control sidebar -->
+  <div class="control-sidebar-bg"></div>
+
 </div>
+<!-- ./wrapper -->
 
-<div class="tab-bar pages">
-  <label class="tab-bar__item pagall">
-    <input type="radio" name="tab-bar-a" checked="checked">
-    <button class="tab-bar__button">
-      <i class="tab-bar__icon ion-stop"></i>
-      <div class="tab-bar__label">All devices</div>
-    </button>
-  </label>
-</div>
+<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- AdminLTE App -->
+<script type="text/javascript">
+    var AdminLTEOptions = {
+        sidebarExpandOnHover: true
+    };
+</script>
+<script type="text/javascript" src="bower_components/AdminLTE/dist/js/app.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script type="text/javascript" src="bower_components/AdminLTE/dist/js/demo.js"></script>
 
-<div class="content"></div>
-<ul class="list container"></ul>
+<script type="text/javascript" src="assets/js/mqtt.min.js"></script>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="assets/js/iotcc.js"></script>
 
 </body>
 </html>
