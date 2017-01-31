@@ -84,6 +84,8 @@ var iotCC = {
             }
 
             if (topicPath[4] == 'config') {
+                var page = {'pageId': json.pageId, 'pageName': json.pageName, 'icon': json.icon};
+                iotCC.addPage(page);
                 if (json.widget == 'toggle') {
                     if ($('input[name="' + widgetId + '"]').exists() == false) {
                         html = '<label class="switch switch--material">';
@@ -136,14 +138,9 @@ var iotCC = {
                     }
                 }
             } else if (topicPath[3] == 'device') {
-                html = '';
                 $(json.pages).each(function(k, page) {
-                    if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
-                        html += '<div class="row" data-page="' + page.pageId + '"></div>';
-                        iotCC.addTabPage(page);
-                    }
+                    iotCC.addPage(page);
                 });
-                $('section.content').filter('[data-section="dashboard"]').append(html);
             }
             if (typeof(window['iotCCMessageEvents']) != 'undefined') {
                 for(var i in iotCCMessageEvents) {
@@ -168,6 +165,7 @@ var iotCC = {
         if (this.templates[json.template] != undefined) {
             iotCC.addHtml(json, this.templates[json.template]);
         } else {
+            // TODO : fetch custom templates over HTTP
             $.get('template/' + json.template + '.html', function(html) {
                 iotCC.templates[json.template] = html;
                 iotCC.addHtml(json, html);
@@ -180,10 +178,11 @@ var iotCC = {
         }
         html = html.replace(/{(\w*)}/g, '');
         var section = $('section.content').filter('[data-section="dashboard"]');
-        var widgets = $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').length;
+        // TODO: add after sort ?
+        /*var widgets = $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').length;
         if (widgets > 0 && widgets%2 == 0) {
             $(section).find('div[data-page="' + json.pageId + '"]').append('<div class="clearfix visible-sm-block"></div>');
-        }
+        }*/
         $(section).find('div[data-page="' + json.pageId + '"]').append(html);
         if (json.callback != undefined) {
             $('input[name="' + json.widgetId + '"]').click(json.callback);
@@ -192,7 +191,15 @@ var iotCC = {
              return $(a).data('order') > $(b).data('order');
         }).appendTo('div[data-page="' + json.pageId + '"]');
     },
-    addTabPage: function(page){
+    addPage: function(page) {
+        if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
+            if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == true) {
+                var html = '<div class="row" data-page="' + page.pageId + '"></div>';
+            } else {
+                var html = '<div class="row hide" data-page="' + page.pageId + '"></div>';
+            }
+            $('section.content').filter('[data-section="dashboard"]').append(html);
+        }
         if ($('div.pagination').find('label').filter('[data-pagination="' + page.pageId + '"]').exists() == false) {
             var html = '<label class="tab-bar__item tab-bar--material__item" data-pagination="' + page.pageId + '">';
             html += '<input type="radio" name="tab-bar-material-a">';
@@ -210,21 +217,34 @@ var iotCC = {
         }
     },
     simulateDevices: function() {
-        this.mqttClient.publish('/iotcc/' + mqttConfig.clientId + '/device', '{"command":"getDevice","param":""}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/relays/device', '{"name":"2 relays","desc":"on a board", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}, {"pageId" : 20, "pageName" : "Dogs heating", "icon": "ion-ios-paw"}, {"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-
+        //this.mqttClient.publish('/iotcc/' + mqttConfig.clientId + '/device', '{"command":"getDevice","param":""}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/heater1/device', '{"name":"House heating 1","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/heater1/heater/config', '{"id":"100", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-yellow", "order": 40}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/heater2/device', '{"name":"House heating 2","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/heater2/heater/config', '{"id":"101", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Kitchen Heater", "topic":"/iotcc/heater2/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-yellow", "order": 30}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/heater3/device', '{"name":"House heating 3","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/heater3/heater/config', '{"id":"102", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Bedroom Heater", "topic":"/iotcc/heater3/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-yellow", "order": 10}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/heater4/device', '{"name":"House heating 4","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/heater4/heater/config', '{"id":"103", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Living Heater", "topic":"/iotcc/heater4/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-yellow", "order": 20}', {qos: 1, retained: false});
 
+        this.mqttClient.publish('/iotcc/dogsheating/device', '{"name":"Dogs heating","desc":"", "pages" : [{"pageId" : 20, "pageName" : "Dogs heating", "icon": "ion-ios-paw"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/dogsheating/toggle1/config', '{"id":"200", "pageName": "Dogs heating", "pageId": 20, "widget":"toggle", "title":"Mara", "topic":"/iotcc/dogsheating/toggle1", "checked":true, "template": "template-1", "icon": "ion-ios-paw", "order" : 10}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/dogsheating/toggle2/config', '{"id":"201", "pageName": "Dogs Heating", "pageId": 20, "widget":"toggle", "title":"Linda", "topic":"/iotcc/dogsheating/toggle2", "template": "template-1", "icon": "ion-ios-paw", "order" : 20}', {qos: 1, retained: false});
 
-        this.mqttClient.publish('/iotcc/outdoorlights/garage/config', '{"id":"300", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"Garage", "topic":"/iotcc/outdoorlights/garage", "checked":true, "template": "template-1", "icon": "ion-model-s", "order": 40}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights/house1/config', '{"id":"301", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House front", "topic":"/iotcc/outdoorlights/house1", "template": "template-1", "icon": "ion-ios-home", "order": 10}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights/house2/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House back", "topic":"/iotcc/outdoorlights/house2", "template": "template-1", "icon": "ion-ios-home", "order": 20}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights/house3/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House sides", "topic":"/iotcc/outdoorlights/house3", "template": "template-1", "icon": "ion-ios-home", "order": 30}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/outdoorlights1/device', '{"name":"Outdoor lighting 1","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/outdoorlights1/garage/config', '{"id":"300", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"Garage", "topic":"/iotcc/outdoorlights/garage", "checked":true, "template": "template-1", "icon": "ion-model-s", "order": 40}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/outdoorlights2/device', '{"name":"Outdoor lighting 2","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/outdoorlights2/house1/config', '{"id":"301", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House front", "topic":"/iotcc/outdoorlights/house1", "template": "template-1", "icon": "ion-ios-home", "order": 10}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/outdoorlights3/device', '{"name":"Outdoor lighting 3","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/outdoorlights3/house2/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House back", "topic":"/iotcc/outdoorlights/house2", "template": "template-1", "icon": "ion-ios-home", "order": 20}', {qos: 1, retained: false});
+
+        this.mqttClient.publish('/iotcc/outdoorlights4/device', '{"name":"Outdoor lighting 4","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/outdoorlights4/house3/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House sides", "topic":"/iotcc/outdoorlights/house3", "template": "template-1", "icon": "ion-ios-home", "order": 30}', {qos: 1, retained: false});
     },
 }
 
