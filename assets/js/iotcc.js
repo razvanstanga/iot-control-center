@@ -21,31 +21,33 @@ var iotCC = {
     mqttConfig: {},
     mqttClient: null,
     templates : [],
-    setConfig: function(mqttConfig) {
-        this.mqttConfig = Object.assign(this.mqttDefaultConfig, mqttConfig);
-    },
-    getConfig: function() {
-        return this.mqttConfig;
-    },
     init: function(mqttConfig) {
-        if ((typeof(window['mqttConfig']) == 'undefined')) {
-            console.log ('mqttConfig is not defined in config.js. see config.sample.js');
-            return;
-        } else if (typeof jQuery == 'undefined') {
-            console.log ('IoT Control center requires jQuery');
+        if (typeof jQuery == 'undefined') {
+            this.showNotification('jQuery', 'IoT Control Center requires jQuery', 'dashboard', 'danger');
+            logger.log ('IoT Control center requires jQuery');
             return;
         }
-        this.setConfig(mqttConfig);
+        var config = this.getConfig();
+        if (typeof config == 'undefined') {
+            this.showNotification('MQTT connection data', 'Please set the MQTT connection data in Settings', 'dashboard', 'danger');
+            logger.log ('MQTT conection data is not set');
+            return;
+        }
+        // TODO: check for localStorage object
+        this.mqttConfig = Object.assign(this.mqttDefaultConfig, config);
+
+        this.showNotification('Connecting to MQTT server', 'Trying to connect to ' + this.mqttConfig.host + ':' + this.mqttConfig.port, 'dashboard', 'info');
 
         this.mqttClient = mqtt.connect('ws' + (this.mqttConfig.secure==true?'s':'') + '://' + this.mqttConfig.host + ':' + this.mqttConfig.port, this.mqttConfig);
 
         this.mqttClient.on('error', function (err) {
-            console.log(err);
+            logger.log('Error' + err);
             iotCC.mqttClient.end();
         });
 
         this.mqttClient.on('connect', function () {
-            if (iotCC.mqttConfig.debug) console.log('client connected:' + iotCC.mqttConfig.clientId);
+            if (iotCC.mqttConfig.debug) logger.log('client connected:' + iotCC.mqttConfig.clientId);
+            iotCC.showNotification('Connected to MQTT server' + iotCC.mqttConfig.host + ':' + iotCC.mqttConfig.port, 'Waiting to receive data from devices.', 'dashboard', 'info');
         });
 
         this.mqttClient.subscribe('/iotcc/+/+/config', {qos: 1});
@@ -57,8 +59,8 @@ var iotCC = {
                 try {
                     window[iotCCInitEvents[i]](this);
                 } catch (err) {
-                    console.log (iotCCInitEvents[i] + 'is not defined');
-                    console.log (err);
+                    logger.log (iotCCInitEvents[i] + 'is not defined');
+                    logger.log (err);
                 }
             }
         }
@@ -71,16 +73,16 @@ var iotCC = {
             try {
                 var json = JSON.parse(message.toString());
             } catch(err){
-                console.log ('There was a problem decoding the JSON message:\n\t' + message.toString());
-                console.log (err);
+                logger.log ('There was a problem decoding the JSON message:\n\t' + message.toString());
+                logger.log (err);
                 return;
             }
             var topicPath = topic.split('/'),
             widgetId = iotCC.formatTopic(topic),
             widget, html;
-
+            $('.notification-dashboard').addClass('hide');
             if (iotCC.mqttConfig.debug) {
-                console.log('Received Topic:= ' + topic + '\n\tMessage:= ' + message.toString());
+                logger.log('Received Topic:= ' + topic + '\n\tMessage:= ' + message.toString());
             }
 
             if (topicPath[4] == 'config') {
@@ -147,15 +149,15 @@ var iotCC = {
                     try {
                         window[iotCCMessageEvents[i]](this, topic, topicPath, json);
                     } catch (err) {
-                        console.log (iotCCMessageEvents[i] + 'is not defined');
-                        console.log (err);
+                        logger.log (iotCCMessageEvents[i] + 'is not defined');
+                        logger.log (err);
                     }
                 }
             }
         });
 
-        iotCC.mqttClient.on('close', function () {
-            console.log(mqttConfig.clientId + ' disconnected');
+        this.mqttClient.on('close', function () {
+            logger.log(iotCC.mqttConfig.clientId + ' disconnected');
         });
     },
     formatTopic: function(topic) {
@@ -192,11 +194,12 @@ var iotCC = {
         }).appendTo('div[data-page="' + json.pageId + '"]');
     },
     addPage: function(page) {
+        $('label').filter('[data-pagination="0"]').parent().removeClass('hide');
         if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
             if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == true) {
-                var html = '<div class="row" data-page="' + page.pageId + '"></div>';
+                var html = '<div class="row page" data-page="' + page.pageId + '"></div>';
             } else {
-                var html = '<div class="row hide" data-page="' + page.pageId + '"></div>';
+                var html = '<div class="row page hide" data-page="' + page.pageId + '"></div>';
             }
             $('section.content').filter('[data-section="dashboard"]').append(html);
         }
@@ -211,8 +214,8 @@ var iotCC = {
             $('.pagination').append(html);
             $('label').filter('[data-pagination="' + page.pageId + '"]').click(function(e){
                 var pageId = $(this).data('pagination');
-                $('div.row').addClass('hide');
-                $('div.row').filter('[data-page="' + pageId + '"]').removeClass('hide');
+                $('div.page').addClass('hide');
+                $('div.page').filter('[data-page="' + pageId + '"]').removeClass('hide');
             });
         }
     },
@@ -246,11 +249,56 @@ var iotCC = {
         this.mqttClient.publish('/iotcc/outdoorlights4/device', '{"name":"Outdoor lighting 4","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
         this.mqttClient.publish('/iotcc/outdoorlights4/house3/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House sides", "topic":"/iotcc/outdoorlights/house3", "template": "template-1", "icon": "ion-ios-home", "bgcolor": "bg-orange", "order": 30}', {qos: 1, retained: false});
     },
+    saveConfig: function() {
+        var config = {
+            'clientId': $('#mqttClientId').val(),
+            'host': $('#mqttHost').val(),
+            'port': $('#mqttPort').val(),
+            'username': $('#mqttUser').val(),
+            'password': $('#mqttPass').val(),
+            'secure': $('#mqttSecure').prop('checked'),
+            'debug': $('#mqttDebug').prop('checked'),
+            'simulateDevices': $('#mqttSimulateDevices').prop('checked'),
+        };
+
+        try {
+            localStorage.setItem('mqttConfig', JSON.stringify(config));
+            iotCC.showNotification('MQTT connection data', 'Data saved succesfully', 'settings', 'info', 3);
+        } catch(ex) {
+            iotCC.showNotification('MQTT connection data', 'Cannot save data to local storage', 'settings', 'danger', 5);
+        }
+    },
+    getConfig: function() {
+        try {
+            var config = JSON.parse(localStorage.getItem('mqttConfig'));
+            $('#mqttClientId').val(config.clientId);
+            $('#mqttHost').val(config.host);
+            $('#mqttPort').val(config.port);
+            $('#mqttUser').val(config.username);
+            $('#mqttPass').val(config.password);
+            $('#mqttSecure').prop('checked', config.secure);
+            $('#mqttDebug').prop('checked', config.debug);
+            $('#mqttSimulateDevices').prop('checked', config.simulateDevices);
+        } catch(ex){
+            return;
+        }
+        return config;
+    },
+    showNotification: function(title, content, section, cls, timer) {
+        $('div.notification-' + section).removeClass('hide').addClass('callout-' + cls);
+        $('div.notification-' + section).find('span').html(content);
+        $('div.notification-' + section).find('h4').html(title);
+        if (timer != undefined) {
+            setTimeout(function(){
+                $('div.notification-' + section).addClass('hide');
+            }, timer * 1000)
+        }
+    }
 }
 
 jQuery.fn.exists = function(){return ($(this).length > 0);}
  $(document).ready(function(){
-    iotCC.init(mqttConfig);
+    iotCC.init();
 
     $('.navigation').click(function(e){
         e.preventDefault();
@@ -260,17 +308,19 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
         $('section.content,section.content-header').addClass('hide');
         $('section.content,section.content-header').filter('[data-section="' + section + '"]').removeClass('hide');
     });
+
     $('label').filter('[data-pagination="0"]').click(function(e){
-        $('div.row').removeClass('hide');
+         $('div.page').removeClass('hide');
+    });
+
+    $('#saveMqttConfig').click(function(e){
+        e.preventDefault();
+        iotCC.saveConfig();
     });
 });
 
 // custom console
-console = new Object();
-console.log = function(log) {
+logger = new Object();
+logger.log = function(log) {
     $('.console').prepend(log + '<br />');
 };
-console.debug = console.log;
-console.info = console.log;
-console.warn = console.log;
-console.error = console.log;
