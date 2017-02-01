@@ -15,12 +15,15 @@ var iotCC = {
         },
         rejectUnauthorized: false,
         secure: false,
-        simulateDevices: false,
         debug: false,
     },
     mqttConfig: {},
     mqttClient: null,
-    templates : [],
+    templates: [],
+    events: {
+        'connect': [],
+        'message': []
+    },
     init: function(mqttConfig) {
         if (typeof jQuery == 'undefined') {
             this.showNotification('jQuery', 'IoT Control Center requires jQuery', 'dashboard', 'danger');
@@ -34,42 +37,37 @@ var iotCC = {
             return;
         }
         // TODO: check for localStorage object
-        this.mqttConfig = Object.assign(this.mqttDefaultConfig, config);
 
         this.showNotification('Connecting to MQTT server', 'Trying to connect to ' + this.mqttConfig.host + ':' + this.mqttConfig.port, 'dashboard', 'info');
 
         this.mqttClient = mqtt.connect('ws' + (this.mqttConfig.secure==true?'s':'') + '://' + this.mqttConfig.host + ':' + this.mqttConfig.port, this.mqttConfig);
 
-        this.mqttClient.on('error', function (err) {
+        this.mqttClient.on('error', function(err) {
             logger.log('Error' + err);
             iotCC.mqttClient.end();
         });
 
-        this.mqttClient.on('connect', function () {
+        this.mqttClient.on('connect', function() {
             if (iotCC.mqttConfig.debug) logger.log('client connected:' + iotCC.mqttConfig.clientId);
-            iotCC.showNotification('Connected to MQTT server' + iotCC.mqttConfig.host + ':' + iotCC.mqttConfig.port, 'Waiting to receive data from devices.', 'dashboard', 'info');
+            iotCC.showNotification('Connected to MQTT server ' + iotCC.mqttConfig.host + ':' + iotCC.mqttConfig.port, 'Waiting to receive data from devices.', 'dashboard', 'info');
+
+            for(var callback in iotCC.events.connect) {
+                try {
+                    iotCC.events.connect[callback]();
+                } catch (err) {
+                    logger.log ('connect callback error');
+                    logger.log (err);
+                }
+            }
         });
 
         this.mqttClient.subscribe('/iotcc/+/+/config', {qos: 1});
         this.mqttClient.subscribe('/iotcc/+/+/data', {qos: 1});
         this.mqttClient.subscribe('/iotcc/+/device', {qos: 1});
 
-        if (typeof(window['iotCCInitEvents']) != 'undefined') {
-            for(var i in iotCCInitEvents) {
-                try {
-                    window[iotCCInitEvents[i]](this);
-                } catch (err) {
-                    logger.log (iotCCInitEvents[i] + 'is not defined');
-                    logger.log (err);
-                }
-            }
-        }
+        this.refreshDevices();
 
-        if (this.mqttConfig.simulateDevices) {
-            this.simulateDevices();
-        }
-
-        this.mqttClient.on('message', function (topic, message, packet) {
+        this.mqttClient.on('message', function(topic, message, packet) {
             try {
                 var json = JSON.parse(message.toString());
             } catch(err){
@@ -144,19 +142,17 @@ var iotCC = {
                     iotCC.addPage(page);
                 });
             }
-            if (typeof(window['iotCCMessageEvents']) != 'undefined') {
-                for(var i in iotCCMessageEvents) {
-                    try {
-                        window[iotCCMessageEvents[i]](this, topic, topicPath, json);
-                    } catch (err) {
-                        logger.log (iotCCMessageEvents[i] + 'is not defined');
-                        logger.log (err);
-                    }
+            for(var callback in iotCC.events.message) {
+                try {
+                    iotCC.events.message[callback](json, widgetId, topic, topicPath);
+                } catch (err) {
+                    logger.log ('message callback error');
+                    logger.log (err);
                 }
             }
         });
 
-        this.mqttClient.on('close', function () {
+        this.mqttClient.on('close', function() {
             logger.log(iotCC.mqttConfig.clientId + ' disconnected');
         });
     },
@@ -219,36 +215,6 @@ var iotCC = {
             });
         }
     },
-    simulateDevices: function() {
-        //this.mqttClient.publish('/iotcc/' + mqttConfig.clientId + '/device', '{"command":"getDevice","param":""}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/heater1/device', '{"name":"House heating 1","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/heater1/heater/config', '{"id":"100", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 40}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/heater2/device', '{"name":"House heating 2","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/heater2/heater/config', '{"id":"101", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Kitchen Heater", "topic":"/iotcc/heater2/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 30}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/heater3/device', '{"name":"House heating 3","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/heater3/heater/config', '{"id":"102", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Bedroom Heater", "topic":"/iotcc/heater3/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 10}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/heater4/device', '{"name":"House heating 4","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/heater4/heater/config', '{"id":"103", "pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Living Heater", "topic":"/iotcc/heater4/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 20}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/dogsheating/device', '{"name":"Dogs heating","desc":"", "pages" : [{"pageId" : 20, "pageName" : "Dogs heating", "icon": "ion-ios-paw"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/dogsheating/toggle1/config', '{"id":"200", "pageName": "Dogs heating", "pageId": 20, "widget":"toggle", "title":"Mara", "topic":"/iotcc/dogsheating/toggle1", "checked":true, "template": "template-1", "icon": "ion-ios-paw", "bgcolor": "bg-green", "order" : 10}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/dogsheating/toggle2/config', '{"id":"201", "pageName": "Dogs Heating", "pageId": 20, "widget":"toggle", "title":"Linda", "topic":"/iotcc/dogsheating/toggle2", "template": "template-1", "icon": "ion-ios-paw", "bgcolor": "bg-green", "order" : 20}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/outdoorlights1/device', '{"name":"Outdoor lighting 1","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights1/garage/config', '{"id":"300", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"Garage", "topic":"/iotcc/outdoorlights/garage", "checked":true, "template": "template-1", "icon": "ion-model-s", "bgcolor": "bg-orange", "order": 40}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/outdoorlights2/device', '{"name":"Outdoor lighting 2","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights2/house1/config', '{"id":"301", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House front", "topic":"/iotcc/outdoorlights/house1", "template": "template-1", "icon": "ion-ios-home", "bgcolor": "bg-orange", "order": 10}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/outdoorlights3/device', '{"name":"Outdoor lighting 3","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights3/house2/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House back", "topic":"/iotcc/outdoorlights/house2", "template": "template-1", "icon": "ion-ios-home", "bgcolor": "bg-orange", "order": 20}', {qos: 1, retained: false});
-
-        this.mqttClient.publish('/iotcc/outdoorlights4/device', '{"name":"Outdoor lighting 4","desc":"", "pages" : [{"pageId" : 30, "pageName" : "Outdoor Lights", "icon": "ion-ios-home"}]}', {qos: 1, retained: false});
-        this.mqttClient.publish('/iotcc/outdoorlights4/house3/config', '{"id":"302", "pageName": "Outdoor lightling", "pageId": 30, "widget":"toggle", "title":"House sides", "topic":"/iotcc/outdoorlights/house3", "template": "template-1", "icon": "ion-ios-home", "bgcolor": "bg-orange", "order": 30}', {qos: 1, retained: false});
-    },
     saveConfig: function() {
         var config = {
             'clientId': $('#mqttClientId').val(),
@@ -264,6 +230,7 @@ var iotCC = {
         try {
             localStorage.setItem('mqttConfig', JSON.stringify(config));
             iotCC.showNotification('MQTT connection data', 'Data saved succesfully', 'settings', 'info', 3);
+            this.getConfig();
         } catch(ex) {
             iotCC.showNotification('MQTT connection data', 'Cannot save data to local storage', 'settings', 'danger', 5);
         }
@@ -279,6 +246,7 @@ var iotCC = {
             $('#mqttSecure').prop('checked', config.secure);
             $('#mqttDebug').prop('checked', config.debug);
             $('#mqttSimulateDevices').prop('checked', config.simulateDevices);
+            this.mqttConfig = Object.assign(this.mqttDefaultConfig, config);
         } catch(ex){
             return;
         }
@@ -289,9 +257,19 @@ var iotCC = {
         $('div.notification-' + section).find('span').html(content);
         $('div.notification-' + section).find('h4').html(title);
         if (timer != undefined) {
-            setTimeout(function(){
+            setTimeout(function() {
                 $('div.notification-' + section).addClass('hide');
-            }, timer * 1000)
+            }, timer * 1000);
+        }
+    },
+    refreshDevices: function() {
+        this.mqttClient.publish('/iotcc/device', '{"clientId": "' + this.mqttConfig.clientId + '"}', {qos: 1, retained: false});
+    },
+    addEvent: function(on, callback) {
+        if (on == 'connect') {
+            this.events.connect.push(callback);
+        } else if (on == 'message') {
+            this.events.message.push(callback);
         }
     }
 }
@@ -316,6 +294,11 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
     $('#saveMqttConfig').click(function(e){
         e.preventDefault();
         iotCC.saveConfig();
+    });
+
+    $('a').filter('[data-toggle="control-refresh"]').click(function(e){
+        e.preventDefault();
+        iotCC.refreshDevices();
     });
 });
 
