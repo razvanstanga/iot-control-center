@@ -97,6 +97,7 @@ var iotCC = {
                         html += '</label>';
                         json.content = html;
                         json.widgetId = widgetId;
+                        json.selector = 'input';
                         json.callback = function() {
                             if ($(this).prop('checked') == true) {
                                 $(this).data('status', 1);
@@ -107,6 +108,8 @@ var iotCC = {
                             }
                         };
                         iotCC.addWidget(json);
+                    } else {
+                        iotCC.animate($('input[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 } else if (json.widget == 'radios') {
                     html = '';
@@ -116,10 +119,32 @@ var iotCC = {
                     if ($('input[name="' + widgetId + '"]').exists() == false) {
                         json.content = html;
                         json.widgetId = widgetId;
+                        json.selector = 'input';
                         json.callback = function() {
                             iotCC.mqttClient.publish(json.topic + '/data', '{"status":"' + $(this).data('status') + '"}', {qos: 1, retained: false});
                         };
                         iotCC.addWidget(json);
+                    } else {
+                        iotCC.animate($('input[name="' + widgetId + '"]').closest(".widgetcontainer"));
+                    }
+                } else if (json.widget == 'data' || json.widget == 'data-control') {
+                    html = '';
+                    if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material">-</button> ';
+                    html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="lead">' + json.value + '</span> ' + (json.valuedescription?'<span class="lead">' + json.valuedescription + '</lead>':'') + '';
+                    if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material">+</button>';
+                    if ($('span[name="' + widgetId + '"]').exists() == false) {
+                        json.content = html;
+                        json.widgetId = widgetId;
+                        json.selector = 'button';
+                        json.callback = function() {
+                            var action = $(this).data('action');
+                            var value = $('span[name="' + $(this).attr('name') + '"]').data('value');
+                            value = action == '+' ? parseInt(value) + 1 : parseInt(value) - 1;
+                            iotCC.mqttClient.publish(json.topic + '/data', '{"value":"' + value + '"}', {qos: 1, retained: false});
+                        };
+                        iotCC.addWidget(json);
+                    } else {
+                        iotCC.animate($('span[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 }
             } else if (topicPath[4] == 'data') {
@@ -135,6 +160,10 @@ var iotCC = {
                 } else if (widget == 'radios') {
                     if ($('input[name="' + widgetId + '"]').filter('[data-status="' + json.status + '"]').exists() == true) {
                         $('input[name="' + widgetId + '"]').filter('[data-status="' + json.status + '"]').prop('checked', true);
+                    }
+                } else if (widget == 'data' || widget == 'data-control') {
+                    if ($('span[name="' + widgetId + '"]').exists() == true) {
+                        $('span[name="' + widgetId + '"]').html(json.value).data('value', json.value);
                     }
                 }
             } else if (topicPath[3] == 'device') {
@@ -177,17 +206,23 @@ var iotCC = {
         html = html.replace(/{(\w*)}/g, '');
         var section = $('section.content').filter('[data-section="dashboard"]');
         // TODO: add after sort ?
-        /*var widgets = $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').length;
+        var widgets = $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').length;
         if (widgets > 0 && widgets%2 == 0) {
-            $(section).find('div[data-page="' + json.pageId + '"]').append('<div class="clearfix visible-sm-block"></div>');
-        }*/
+            //$(section).find('div[data-page="' + json.pageId + '"]').append('<div class="clearfix visible-sm-block" data-order="' + json.order + '"></div>');
+        }
         $(section).find('div[data-page="' + json.pageId + '"]').append(html);
         if (json.callback != undefined) {
-            $('input[name="' + json.widgetId + '"]').click(json.callback);
+            $(json.selector + '[name="' + json.widgetId + '"]').click(json.callback);
         }
         $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').sort(function(a,b) {
              return $(a).data('order') > $(b).data('order');
         }).appendTo('div[data-page="' + json.pageId + '"]');
+        $(section).find('div[data-page="' + json.pageId + '"]').find('div.visible-sm-block').remove();
+        $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').each(function(k,v){
+            if ((k+1)%2 == 0) {
+                $(v).after('<div class="clearfix visible-sm-block"></div>');
+            }
+        });
     },
     addPage: function(page) {
         $('label').filter('[data-pagination="0"]').parent().removeClass('hide');
@@ -271,6 +306,9 @@ var iotCC = {
         } else if (on == 'message') {
             this.events.message.push(callback);
         }
+    },
+    animate: function(element){
+        element.fadeTo("fast", 0.33 ).fadeTo("fast", 1);
     }
 }
 
