@@ -5,6 +5,11 @@ var appOptions = {
 
 var iotCC = {
     mqttDefaultConfig: {
+        clientId: 'IoTCC_' + Math.random(),
+        host: 'm21.cloudmqtt.com',
+        port: '33744',
+        username: 'uruhdxje',
+        password: 'wEpIMxvEFih5',
         keepalive: 10,
         protocolId: 'MQTT',
         protocolVersion: 4,
@@ -18,8 +23,9 @@ var iotCC = {
             retain: true
         },
         rejectUnauthorized: false,
-        secure: false,
-        debug: false,
+        secure: true,
+        debug: true,
+        simulateDevices: true,
     },
     mqttConfig: {},
     mqttClient: null,
@@ -307,19 +313,19 @@ var iotCC = {
     getConfig: function() {
         try {
             var config = JSON.parse(localStorage.getItem('mqttConfig'));
-            $('#mqttClientId').val(config.clientId);
-            $('#mqttHost').val(config.host);
-            $('#mqttPort').val(config.port);
-            $('#mqttUser').val(config.username);
-            $('#mqttPass').val(config.password);
-            $('#mqttSecure').prop('checked', config.secure);
-            $('#mqttDebug').prop('checked', config.debug);
-            $('#mqttSimulateDevices').prop('checked', config.simulateDevices);
             this.mqttConfig = Object.assign(this.mqttDefaultConfig, config);
-        } catch(ex){
+            $('#mqttClientId').val(this.mqttConfig.clientId);
+            $('#mqttHost').val(this.mqttConfig.host);
+            $('#mqttPort').val(this.mqttConfig.port);
+            $('#mqttUser').val(this.mqttConfig.username);
+            $('#mqttPass').val(this.mqttConfig.password);
+            $('#mqttSecure').prop('checked', this.mqttConfig.secure);
+            $('#mqttDebug').prop('checked', this.mqttConfig.debug);
+            $('#mqttSimulateDevices').prop('checked', this.mqttConfig.simulateDevices);
+        } catch(ex) {
             return;
         }
-        return config;
+        return this.mqttConfig;
     },
     showNotification: function(title, content, section, cls, timer) {
         $('div.notification-' + section).removeClass('hide').addClass('callout-' + cls);
