@@ -1,257 +1,285 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>IoT Control Center</title>
-  <!-- Tell the browser to be responsive to screen width -->
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>IoT Control Center</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 
-  <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/AdminLTE.min.css">
-  <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/skins/_all-skins.min.css">
-  <link rel="stylesheet" href="assets/css/iotcc.css">
+    <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="assets/css/iotcc.css">
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
 <div class="wrapper">
     <header class="main-header">
-    <!-- Logo -->
-    <a href="#dashboard" class="logo">
-      <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>IoT</b></span>
-      <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>IoT</b> Control Center</span>
-    </a>
+        <!-- Logo -->
+        <a href="#dashboard" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><b>IoT</b></span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg"><b>IoT</b> Control Center</span>
+        </a>
 
-    <!-- Header Navbar: style can be found in header.less -->
-    <nav class="navbar navbar-static-top">
-      <!-- Sidebar toggle button-->
-      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-        <span class="sr-only">Toggle navigation</span>
-      </a>
-      <!-- Navbar Right Menu -->
-      <div class="navbar-custom-menu">
-        <ul class="nav navbar-nav">
-          <!-- Control Sidebar Toggle Button -->
-          <li>
-            <a href="#" data-toggle="control-refresh" title="Refresh devices"><i class="fa fa-refresh"></i></a>
-          </li>
-          <li>
-            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gear"></i></a>
-          </li>
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <!-- Navbar Right Menu -->
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <!-- Control Sidebar Toggle Button -->
+                    <li>
+                        <a href="#" data-toggle="control-refresh" title="Refresh devices"><i class="fa fa-refresh"></i></a>
+                    </li>
+                    <li>
+                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gear"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- /.search form -->
+            <!-- sidebar menu: : style can be found in sidebar.less -->
+            <ul class="sidebar-menu">
+                <!--li class="header">Options</li-->
+                <li class="active">
+                    <a href="#" class="navigation" data-section="dashboard">
+                        <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="navigation" data-section="settings">
+                        <i class="fa fa-gears"></i> <span>Settings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="navigation" data-section="log">
+                        <i class="fa fa-align-justify"></i> <span>Log</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <section class="content-header" data-section="dashboard">
+            <h1>Dashboard</h1>
+            <ol class="breadcrumb">
+                <li class="active"><i class="fa fa-dashboard"></i> Dashboard</li>
+            </ol>
+        </section>
+
+        <section class="content-header hide" data-section="settings">
+            <h1>Settings</h1>
+            <ol class="breadcrumb">
+                <li class="active"><i class="fa fa-gears"></i> Settings</li>
+            </ol>
+        </section>
+
+        <section class="content-header hide" data-section="log">
+            <h1>Log</h1>
+            <ol class="breadcrumb">
+                <li class="active"><i class="fa fa-gears"></i> Logs</li>
+            </ol>
+        </section>
+
+        <!-- Dashboard content -->
+        <section class="content" data-section="dashboard">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="tab-bar tab-bar--top tab-bar--material pagination hide">
+                        <label class="tab-bar__item tab-bar--material__item" data-pagination="0">
+                            <input type="radio" name="tab-bar-material-a" checked="checked">
+                            <button class="tab-bar__button tab-bar--material__button">
+                                <i class="tab-bar__icon tab-bar--material__icon ion-drag"></i>
+                                <div class="tab-bar__label tab-bar--material__label">All</div>
+                            </button>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="callout notification-dashboard hide">
+                        <h4></h4>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Settings content -->
+        <section class="content hide" data-section="settings">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="callout notification-settings hide">
+                        <h4></h4>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">MQTT connection data</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form id="mqttConfig">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="mqttClientId">Client ID</label>
+                                    <input type="text" class="form-control" id="mqttClientId" name="mqttClientId" placeholder="Client ID" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="mqttHost">Host</label>
+                                    <input type="text" class="form-control" id="mqttHost" name="mqttHost" placeholder="Host" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="mqttHost">Port</label>
+                                    <input type="text" class="form-control" id="mqttPort" name="mqttPort" placeholder="Port" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="mqttUser">Username</label>
+                                    <input type="text" class="form-control" id="mqttUser" name="mqttUser" placeholder="Username" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="mqttPass">Password</label>
+                                    <input type="text" class="form-control" id="mqttPass" name="mqttPass" placeholder="Password" />
+                                </div>
+                                <div class="checkbox">
+                                    <label for="mqttSecure">
+                                    <input type="checkbox" id="mqttSecure" name="mqttSecure" /> Secure
+                                </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label for="mqttDebug">
+                                    <input type="checkbox" id="mqttDebug" name="mqttDebug" /> Debug
+                                </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label for="mqttSimulateDevices">
+                                    <input type="checkbox" id="mqttSimulateDevices" name="mqttSimulateDevices" /> Simulate devices
+                                </label>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary" id="saveMqttConfig">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Options</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form id="options">
+                            <div class="box-body">
+                                <div class="checkbox">
+                                    <label for="pageContainer">
+                                        <input type="checkbox" id="pageContainer" name="pageContainer" /> Add page container
+                                    </label>
+                                </div>
+                                <div class="checkbox">
+                                    <label for="templateDebug">
+                                        <input type="checkbox" id="templateDebug" name="templateDebug" /> Template debug
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary" id="saveOptions">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+
+        <!-- Log content -->
+        <section class="content hide" data-section="log">
+            <pre class="console"></pre>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 0.1
+        </div>
+        <strong>Copyright &copy; 2017 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
+    </footer>
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <!-- Create the tabs -->
+        <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+            <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-gear"></i></a></li>
         </ul>
-      </div>
-    </nav>
-  </header>
-  <!-- Left side column. contains the logo and sidebar -->
-  <aside class="main-sidebar">
-    <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
-      <!-- /.search form -->
-      <!-- sidebar menu: : style can be found in sidebar.less -->
-      <ul class="sidebar-menu">
-        <!--li class="header">Options</li-->
-        <li class="active">
-            <a href="#" class="navigation" data-section="dashboard">
-                <i class="fa fa-dashboard"></i> <span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="navigation" data-section="settings">
-                <i class="fa fa-gears"></i> <span>Settings</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" class="navigation" data-section="log">
-                <i class="fa fa-align-justify"></i> <span>Log</span>
-            </a>
-        </li>
-      </ul>
-    </section>
-    <!-- /.sidebar -->
-  </aside>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <!-- Home tab content -->
+            <div class="tab-pane" id="control-sidebar-home-tab">
 
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-    <section class="content-header" data-section="dashboard">
-        <h1>Dashboard</h1>
-        <ol class="breadcrumb">
-            <li class="active"><i class="fa fa-dashboard"></i> Dashboard</li>
-        </ol>
-    </section>
-
-    <section class="content-header hide" data-section="settings">
-        <h1>Settings</h1>
-        <ol class="breadcrumb">
-            <li class="active"><i class="fa fa-gears"></i> Settings</li>
-        </ol>
-    </section>
-
-    <section class="content-header hide" data-section="log">
-        <h1>Log</h1>
-        <ol class="breadcrumb">
-            <li class="active"><i class="fa fa-gears"></i> Logs</li>
-        </ol>
-    </section>
-
-    <!-- Dashboard content -->
-    <section class="content" data-section="dashboard">
-
-        <div class="row">
-          <div class="col-md-12">
-            <div class="tab-bar tab-bar--top tab-bar--material pagination hide">
-              <label class="tab-bar__item tab-bar--material__item" data-pagination="0">
-                <input type="radio" name="tab-bar-material-a" checked="checked">
-                <button class="tab-bar__button tab-bar--material__button">
-                  <i class="tab-bar__icon tab-bar--material__icon ion-drag"></i>
-                  <div class="tab-bar__label tab-bar--material__label">All</div>
-                </button>
-              </label>
             </div>
-          </div>
-        </div>
+            <!-- /.tab-pane -->
 
-        <div class="row">
-          <div class="col-md-12">
-            <div class="callout notification-dashboard hide">
-              <h4></h4>
-              <span></span>
+            <!-- Settings tab content -->
+            <div class="tab-pane" id="control-sidebar-settings-tab">
+                <form method="post">
+                    <h3 class="control-sidebar-heading">General Settings</h3>
+
+                    <div class="form-group">
+                        <label class="control-sidebar-subheading">
+                            Debug templates
+                            <input type="checkbox" class="pull-right" name="debugTemplates" />
+                        </label>
+
+                        <p>
+                            Allow the user to show his name in blog posts
+                        </p>
+                    </div>
+                    <!-- /.form-group -->
+                </form>
             </div>
-          </div>
+            <!-- /.tab-pane -->
         </div>
-
-    </section>
-
-    <!-- Settings content -->
-    <section class="content hide" data-section="settings">
-
-      <div class="row">
-        <div class="col-md-12">
-          <div class="callout notification-settings hide">
-            <h4></h4>
-            <span></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <div class="box box-primary">
-            <div class="box-header with-border">
-              <h3 class="box-title">MQTT connection data</h3>
-            </div>
-            <!-- /.box-header -->
-            <!-- form start -->
-            <form id="mqttConfig">
-              <div class="box-body">
-                <div class="form-group">
-                  <label for="mqttClientId">Client ID</label>
-                  <input type="text" class="form-control" id="mqttClientId" name="mqttClientId" placeholder="Client ID" />
-                </div>
-                <div class="form-group">
-                  <label for="mqttHost">Host</label>
-                  <input type="text" class="form-control" id="mqttHost" name="mqttHost" placeholder="Host" />
-                </div>
-                <div class="form-group">
-                  <label for="mqttHost">Port</label>
-                  <input type="text" class="form-control" id="mqttPort" name="mqttPort" placeholder="Port" />
-                </div>
-                <div class="form-group">
-                  <label for="mqttUser">Username</label>
-                  <input type="text" class="form-control" id="mqttUser" name="mqttUser" placeholder="Username" />
-                </div>
-                <div class="form-group">
-                  <label for="mqttPass">Password</label>
-                  <input type="text" class="form-control" id="mqttPass" name="mqttPass" placeholder="Password" />
-                </div>
-                <div class="checkbox">
-                  <label for="mqttSecure">
-                    <input type="checkbox" id="mqttSecure" name="mqttSecure" /> Secure
-                  </label>
-                </div>
-                <div class="checkbox">
-                  <label for="mqttDebug">
-                    <input type="checkbox" id="mqttDebug" name="mqttDebug" /> Debug
-                  </label>
-                </div>
-                <div class="checkbox">
-                  <label for="mqttSimulateDevices">
-                    <input type="checkbox" id="mqttSimulateDevices" name="mqttSimulateDevices" /> Simulate devices
-                  </label>
-                </div>
-              </div>
-              <!-- /.box-body -->
-
-              <div class="box-footer">
-                <button type="submit" class="btn btn-primary" id="saveMqttConfig">Save</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- /.content -->
-
-    <!-- Log content -->
-    <section class="content hide" data-section="log">
-      <pre class="console"></pre>
-    </section>
-    <!-- /.content -->
-
-  </div>
-  <!-- /.content-wrapper -->
-
-  <footer class="main-footer">
-    <div class="pull-right hidden-xs">
-      <b>Version</b> 0.1
-    </div>
-    <strong>Copyright &copy; 2017 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
-  </footer>
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Create the tabs -->
-    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gear"></i></a></li>
-    </ul>
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <!-- Home tab content -->
-      <div class="tab-pane" id="control-sidebar-home-tab">
-
-      </div>
-      <!-- /.tab-pane -->
-
-      <!-- Settings tab content -->
-      <div class="tab-pane" id="control-sidebar-settings-tab">
-        <form method="post">
-          <h3 class="control-sidebar-heading">General Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Expose author name in posts
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Allow the user to show his name in blog posts
-            </p>
-          </div>
-          <!-- /.form-group -->
-        </form>
-      </div>
-      <!-- /.tab-pane -->
-    </div>
-  </aside>
-  <!-- /.control-sidebar -->
-  <!-- Add the sidebar's background. This div must be placed
+    </aside>
+    <!-- /.control-sidebar -->
+    <!-- Add the sidebar's background. This div must be placed
        immediately after the control sidebar -->
-  <div class="control-sidebar-bg"></div>
-
+    <div class="control-sidebar-bg"></div>
 </div>
 <!-- ./wrapper -->
 
