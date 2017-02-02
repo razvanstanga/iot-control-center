@@ -1,4 +1,4 @@
-IoT Control Center
+# IoT Control Center
 
 IoT JSON comunication protocol via MQTT broker.
 
@@ -20,21 +20,21 @@ I had a few problems with it and decided to build my own control center with ide
 
 How it works (WIP) :
 IoT CC subscribes to
-    /iotcc/+/+/config
-    /iotcc/+/+/data
-    /iotcc/+/device
+- /iotcc/+/+/config
+- /iotcc/+/+/data
+- /iotcc/+/device
 
 IoT CC publishes to
-    /iotcc/device - {"clientId": "{clientId}"}
+- /iotcc/device - {"clientId": "{clientId}"}
 
 IoT devices subscribe to
-    /iotcc/+/+/data
-    /iotcc/device
+- /iotcc/+/+/data
+- /iotcc/device
 
 IoT devices publish to :
-    /iotcc/+/device - {"name":"House heating 1","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}
-    /iotcc/+/+/config - {"pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 40}
-    /iotcc/+/+/data - {"status":"{status}"}
+- /iotcc/+/device - {"name":"House heating 1","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}
+- /iotcc/+/+/config - {"pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 40}
+- /iotcc/+/+/data - {"status":"{status}"}
 
 ### Desktop interface (WIP)
 ![Alt text](/screenshots/desktop.png?raw=true "Desktop interface")
