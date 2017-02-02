@@ -216,15 +216,15 @@ var iotCC = {
             //$(section).find('div[data-page="' + json.pageId + '"]').append('<div class="clearfix visible-sm-block" data-order="' + json.order + '"></div>');
         }
 
-        $(section).find('div[data-page="' + json.pageId + '"]').append(html);
+        $(section).find('div.page[data-page="' + json.pageId + '"]').append(html);
         if (json.callback != undefined) {
             $(json.selector + '[name="' + json.widgetId + '"]').click(json.callback);
         }
-        $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').sort(function(a,b) {
+        $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.widgetcontainer').sort(function(a,b) {
              return $(a).data('order') > $(b).data('order');
-        }).appendTo('div[data-page="' + json.pageId + '"]');
-        $(section).find('div[data-page="' + json.pageId + '"]').find('div.visible-sm-block').remove();
-        $(section).find('div[data-page="' + json.pageId + '"]').find('div.widgetcontainer').each(function(k,v){
+        }).appendTo('div.page[data-page="' + json.pageId + '"]');
+        $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.visible-sm-block').remove();
+        $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.widgetcontainer').each(function(k,v){
             if ((k+1)%2 == 0) {
                 $(v).after('<div class="clearfix visible-sm-block"></div>');
             }
@@ -234,12 +234,12 @@ var iotCC = {
         $('label').filter('[data-pagination="0"]').parent().removeClass('hide');
         if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
             if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == true) {
-                var html = '<div class="row page" data-page="' + page.pageId + '"></div>';
+                var html = '<div class="row page" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
             } else {
-                var html = '<div class="row page hide" data-page="' + page.pageId + '"></div>';
+                var html = '<div class="row page hide" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
             }
             if (appOptions.pageContainer) {
-                var html2 = '<div class="box page {class}" data-pagecontainer="' + page.pageId + '">';
+                var html2 = '<div class="box pagecontainer {class}" data-page="' + page.pageId + '" data-order="' + page.order + '">';
                 html2 += '<div class="box-header with-border {class1}">';
                 html2 += '<h3 class="box-title {class2}">' + page.pageName + '</h3>';
                 if (page.icon) html2 += '<div class="box-tools pull-right ' + page.icon + '"></div>';
@@ -249,13 +249,19 @@ var iotCC = {
                 html2 += '</div>';
                 html2 += '</div>';
                 html2 = this.parseTemplate(page, html2);
-                $('section.content').filter('[data-section="dashboard"]').append(html2);
+                $('section.content[data-section="dashboard"]').append(html2);
+                $('section.content[data-section="dashboard"]').find('div.pagecontainer').sort(function(a,b) {
+                     return $(a).data('order') > $(b).data('order');
+                }).appendTo('section.content[data-section="dashboard"]');
             } else {
                 $('section.content').filter('[data-section="dashboard"]').append(html);
+                $('section.content').find('div.page').sort(function(a,b) {
+                     return $(a).data('order') > $(b).data('order');
+                }).appendTo('section.content[data-section="dashboard"]');
             }
         }
         if ($('div.pagination').find('label').filter('[data-pagination="' + page.pageId + '"]').exists() == false) {
-            var html = '<label class="tab-bar__item tab-bar--material__item" data-pagination="' + page.pageId + '">';
+            var html = '<label class="tab-bar__item tab-bar--material__item" data-pagination="' + page.pageId + '" data-order="' + page.order + '">';
             html += '<input type="radio" name="tab-bar-material-a">';
             html += '<button class="tab-bar__button tab-bar--material__button">';
             html += '<i class="tab-bar__icon tab-bar--material__icon ' + page.icon + '"></i>';
@@ -265,10 +271,17 @@ var iotCC = {
             $('.pagination').append(html);
             $('label').filter('[data-pagination="' + page.pageId + '"]').click(function(e){
                 var pageId = $(this).data('pagination');
-                $('div.page').addClass('hide');
-                $('div.page').filter('[data-page="' + pageId + '"]').removeClass('hide');
-                $('div.page').filter('[data-pagecontainer="' + pageId + '"]').removeClass('hide');
+                if (appOptions.pageContainer) {
+                    $('div.pagecontainer').addClass('hide');
+                    $('div.pagecontainer').filter('[data-page="' + pageId + '"]').removeClass('hide');
+                } else {
+                    $('div.page').addClass('hide');
+                    $('div.page').filter('[data-page="' + pageId + '"]').removeClass('hide');
+                }
             });
+            $('div.pagination').find('label').sort(function(a, b) {
+                 return $(a).data('order') > $(b).data('order');
+            }).appendTo('div.pagination');
         }
     },
     saveConfig: function() {
@@ -362,7 +375,11 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
     });
 
     $('label').filter('[data-pagination="0"]').click(function(e){
-         $('div.page').removeClass('hide');
+        if (appOptions.pageContainer) {
+            $('div.pagecontainer').removeClass('hide');
+        } else {
+            $('div.page').removeClass('hide');
+        }
     });
 
     $('#saveMqttConfig').click(function(e){
