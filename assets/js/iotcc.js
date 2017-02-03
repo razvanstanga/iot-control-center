@@ -71,9 +71,9 @@ var iotCC = {
             }
         });
 
-        this.mqttClient.subscribe('/iotcc/+/+/config', {qos: 1});
-        this.mqttClient.subscribe('/iotcc/+/+/data', {qos: 1});
-        this.mqttClient.subscribe('/iotcc/+/device', {qos: 1});
+        this.mqttClient.subscribe('/+/+/+/config', {qos: 1});
+        this.mqttClient.subscribe('/+/+/+/data', {qos: 1});
+        this.mqttClient.subscribe('/+/+/device', {qos: 1});
 
         this.refreshDevices();
 
@@ -119,18 +119,19 @@ var iotCC = {
                         };
                         iotCC.addWidget(json);
                     } else {
+                        $('input[name="' + widgetId + '"]').prop('checked', json.checked?true:false);
                         iotCC.animate($('input[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 } else if (json.widget == 'radios') {
-                    html = '';
-                    $(json.options).each(function(k, v) {
-                        html += '<label class="radio-button radio-button--material {class3}">';
-                        html += '<input type="radio" name="' + widgetId + '" data-widget="radios" data-status="' + v.status + '" class="radio-button__input radio-button--material__input {class4}" name="r" ' + (v.checked==true?'checked="checked"':'') + '>';
-                        html += '<div class="radio-button__checkmark radio-button--material__checkmark {class5}">';
-                        html += '</div>';
-                        html += v.label +'</label>';
-                    });
                     if ($('input[name="' + widgetId + '"]').exists() == false) {
+                        html = '';
+                        $(json.options).each(function(k, v) {
+                            html += '<label class="radio-button radio-button--material {class3}">';
+                            html += '<input type="radio" name="' + widgetId + '" data-widget="radios" data-status="' + v.status + '" class="radio-button__input radio-button--material__input {class4}" name="r" ' + (v.checked==true?'checked="checked"':'') + '>';
+                            html += '<div class="radio-button__checkmark radio-button--material__checkmark {class5}">';
+                            html += '</div>';
+                            html += v.label +'</label>';
+                        });
                         json.content = html;
                         json.widgetId = widgetId;
                         json.selector = 'input';
@@ -139,14 +140,17 @@ var iotCC = {
                         };
                         iotCC.addWidget(json);
                     } else {
+                        $(json.options).each(function(k, v) {
+                            $('input[name="' + widgetId + '"]').filter('[data-status="' + v.status + '"]').prop('checked', v.checked?true:false);
+                        });
                         iotCC.animate($('input[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 } else if (json.widget == 'data' || json.widget == 'data-control') {
-                    html = '';
-                    if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material btn-xs">-</button> ';
-                    html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text">' + json.value + '</span> ' + (json.valuedescription?'<span class="text">' + json.valuedescription + '</span>':'') + '';
-                    if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material btn-xs">+</button>';
                     if ($('span[name="' + widgetId + '"]').exists() == false) {
+                        html = '';
+                        if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material btn-xs">-</button> ';
+                        html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text">' + json.value + '</span> ' + (json.valuedescription?'<span class="text">' + json.valuedescription + '</span>':'') + '';
+                        if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material btn-xs">+</button>';
                         json.content = html;
                         json.widgetId = widgetId;
                         json.selector = 'button';
@@ -158,6 +162,7 @@ var iotCC = {
                         };
                         iotCC.addWidget(json);
                     } else {
+                        $('span[name="' + widgetId + '"]').html(json.value).data('value', json.value);
                         iotCC.animate($('span[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 }

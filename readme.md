@@ -17,6 +17,8 @@ I had a few problems with it and decided to build my own control center with ide
 - all open control interfaces to show the same data/statuses without the need for refresh
 - TODO: create `scenarios` based on IoT data. if sensor1Temp < 10 then turn on heat
 - TODO: use NodeRed to create scenarios/notifications
+- TODO: subscribe to custom topics, assign template for display
+- TODO: OTA updates with widget configuration
 
 How it works (WIP) :
 IoT CC subscribes to
