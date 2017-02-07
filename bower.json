@@ -18,6 +18,7 @@
   "dependencies": {
     "jquery": "^3.1.1",
     "AdminLTE": "adminlte#^2.3.11",
-    "bootstrap": "^3.3.7"
+    "bootstrap": "^3.3.7",
+    "jquery-serialize-object": "^2.5.0"
   }
 }

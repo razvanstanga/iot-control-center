@@ -60,6 +60,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#" class="navigation" data-section="custom-subscriptions">
+                        <i class="fa fa-list"></i> <span>Custom subscriptions</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="navigation" data-section="settings">
                         <i class="fa fa-gears"></i> <span>Settings</span>
                     </a>
@@ -83,6 +88,13 @@
             </ol>
         </section>
 
+        <section class="content-header hide" data-section="custom-subscriptions">
+            <h1>Custom subscriptions</h1>
+            <ol class="breadcrumb">
+                <li class="active"><i class="fa fa-list"></i> Custom subscriptions</li>
+            </ol>
+        </section>
+
         <section class="content-header hide" data-section="settings">
             <h1>Settings</h1>
             <ol class="breadcrumb">
@@ -100,7 +112,7 @@
         <!-- Dashboard content -->
         <section class="content" data-section="dashboard">
 
-            <div class="row">
+            <div class="row dashboard-notification">
                 <div class="col-md-12">
                     <div class="tab-bar tab-bar--top tab-bar--material pagination hide">
                         <label class="tab-bar__item tab-bar--material__item" data-pagination="0" data-order="0">
@@ -114,11 +126,83 @@
                 </div>
             </div>
 
-            <div class="row">
+        </section>
+
+        <!-- Custom subscriptions content -->
+        <section class="content hide" data-section="custom-subscriptions">
+
+            <div class="row subscriptions-notification">
                 <div class="col-md-12">
-                    <div class="callout notification-dashboard hide">
-                        <h4></h4>
-                        <span></span>
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Add new subscription</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form id="customSubscriptions">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="topic">Subscription topic</label>
+                                    <input type="text" class="form-control" id="topic" name="topic" placeholder="Topic" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="widget">Widget</label>
+                                    <select class="form-control" name="widget" id="widget">
+                                        <option>-- select widget --</option>
+                                        <option value="toggle" data-action="on">Toggle (on/off toggle)</option>
+                                        <option value="radios" data-action="on">Radios (multiple choice action)</option>
+                                        <option value="data" data-action="off">Data (show sensor data)</option>
+                                        <option value="data-control" data-action="on">Data control (show sensor data/control value/heater)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group subscriptionWidgetJson">
+                                    <label for="widgetJson">Widget JSON options</label>
+                                    <input type="text" class="form-control" id="widgetJson" name="widgetJson" placeholder="Widget JSON options" />
+                                </div>
+                                <div class="form-group subscriptionAction hide">
+                                    <label for="actionTopic">Widget action topic</label>
+                                    <input type="text" class="form-control" id="actionTopic" name="actionTopic" placeholder="Widget action topic" />
+                                </div>
+                                <div class="checkbox">
+                                    <label for="active">
+                                    <input type="checkbox" id="active" name="active" /> Activate
+                                </label>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary" id="saveSubscription">Save</button>
+                            </div>
+                            <input type="hidden" name="index" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">Subscriptions</h3>
+                        </div>
+                        <div class="box-body table-responsive no-padding">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>ID</th>
+                                        <th>Topic</th>
+                                        <th>Widget</th>
+                                        <th>Widget JSON</th>
+                                        <th>Action topic</th>
+                                        <th>Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="subscriptions-table">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,16 +212,7 @@
         <!-- Settings content -->
         <section class="content hide" data-section="settings">
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="callout notification-settings hide">
-                        <h4></h4>
-                        <span></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
+            <div class="row settings-notification1">
                 <div class="col-md-12">
                     <div class="box box-primary">
                         <div class="box-header with-border">
@@ -148,38 +223,38 @@
                         <form id="mqttConfig">
                             <div class="box-body">
                                 <div class="form-group">
-                                    <label for="mqttClientId">Client ID</label>
-                                    <input type="text" class="form-control" id="mqttClientId" name="mqttClientId" placeholder="Client ID" />
+                                    <label for="clientId">Client ID</label>
+                                    <input type="text" class="form-control" id="clientId" name="clientId" placeholder="Client ID" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="mqttHost">Host</label>
-                                    <input type="text" class="form-control" id="mqttHost" name="mqttHost" placeholder="Host" />
+                                    <label for="host">Host</label>
+                                    <input type="text" class="form-control" id="host" name="host" placeholder="Host" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="mqttHost">Port</label>
-                                    <input type="text" class="form-control" id="mqttPort" name="mqttPort" placeholder="Port" />
+                                    <label for="port">Port</label>
+                                    <input type="text" class="form-control" id="port" name="port" placeholder="Port" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="mqttUser">Username</label>
-                                    <input type="text" class="form-control" id="mqttUser" name="mqttUser" placeholder="Username" />
+                                    <label for="username">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="mqttPass">Password</label>
-                                    <input type="text" class="form-control" id="mqttPass" name="mqttPass" placeholder="Password" />
+                                    <label for="password">Password</label>
+                                    <input type="text" class="form-control" id="password" name="password" placeholder="Password" />
                                 </div>
                                 <div class="checkbox">
-                                    <label for="mqttSecure">
-                                    <input type="checkbox" id="mqttSecure" name="mqttSecure" /> Secure
+                                    <label for="secure">
+                                    <input type="checkbox" id="secure" name="secure" /> Secure
                                 </label>
                                 </div>
                                 <div class="checkbox">
-                                    <label for="mqttDebug">
-                                    <input type="checkbox" id="mqttDebug" name="mqttDebug" /> Debug
+                                    <label for="debug">
+                                    <input type="checkbox" id="debug" name="debug" /> Debug
                                 </label>
                                 </div>
                                 <div class="checkbox">
-                                    <label for="mqttSimulateDevices">
-                                    <input type="checkbox" id="mqttSimulateDevices" name="mqttSimulateDevices" /> Simulate devices
+                                    <label for="simulateDevices">
+                                    <input type="checkbox" id="simulateDevices" name="simulateDevices" /> Simulate devices
                                 </label>
                                 </div>
                             </div>
@@ -193,7 +268,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row settings-notification2">
                 <div class="col-md-12">
                     <div class="box box-primary">
                         <div class="box-header with-border">
@@ -201,7 +276,7 @@
                         </div>
                         <!-- /.box-header -->
                         <!-- form start -->
-                        <form id="options">
+                        <form id="appConfig">
                             <div class="box-body">
                                 <div class="checkbox">
                                     <label for="pageContainer">
@@ -217,12 +292,38 @@
                             <!-- /.box-body -->
 
                             <div class="box-footer">
-                                <button type="submit" class="btn btn-primary" id="saveOptions">Save</button>
+                                <button type="submit" class="btn btn-primary" id="saveAppConfig">Save</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
+
+            <div class="row settings-notification3">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Backup/Restore</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form id="iotCCConfig">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="iotccconfig">IoTCC Config</label>
+                                    <textarea class="form-control" id="iotccconfig" name="iotccconfig" placeholder="IoTCC Config" rows="10"></textarea>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary" id="saveIoTCCConfig">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </section>
         <!-- /.content -->
 
@@ -285,10 +386,11 @@
 
 <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="bower_components/jquery-serialize-object/dist/jquery.serialize-object.min.js"></script>
 <!-- AdminLTE App -->
 <script type="text/javascript">
     var AdminLTEOptions = {
-        sidebarExpandOnHover: true
+        //sidebarExpandOnHover: true
     };
 </script>
 <script type="text/javascript" src="bower_components/AdminLTE/dist/js/app.min.js"></script>
