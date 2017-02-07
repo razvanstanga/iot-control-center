@@ -39,7 +39,19 @@ IoT devices publish to :
 - /iotcc/+/+/data - {"status":"{status}"}
 
 ### Desktop interface (WIP)
-![Alt text](/screenshots/desktop.png?raw=true "Desktop interface")
+![Alt text](/screenshots/dashboard-desktop.png?raw=true "Desktop interface")
 
 ### Mobile interface (WIP)
-![Alt text](/screenshots/mobile.png?raw=true "Mobile interface")
+![Alt text](/screenshots/dashboard-mobile.png?raw=true "Mobile interface")
+
+### Tablet interface (WIP)
+![Alt text](/screenshots/dashboard-tablet.png?raw=true "Tablet interface")
+
+### Settings page
+![Alt text](/screenshots/settings-page.png?raw=true "Settings page")
+
+### Custom subscriptions page
+![Alt text](/screenshots/custom-subscriptions-page.png?raw=true "Custom subscriptions page")
+
+### Log page
+![Alt text](/screenshots/log-page.png?raw=true "Log page")
