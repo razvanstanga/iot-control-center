@@ -33,6 +33,12 @@ var iotCC = {
         templateDebug: false,
         pageContainer: true
     },
+    customSubscriptionWidgetJson: {
+        'toggle' : '{"pageName": "Custom", "pageId": 1000, "widget":"toggle", "title":"On/Off Toggle", "template": "template-1", "icon": "ion-ios-home", "class": "bg-orange", "order": 10}',
+        'radios': '{"pageName": "Custom", "pageId": 1000, "widget":"radios", "title":"Multiple choice", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "class": "bg-blue", "order": 20}',
+        'data': '{"pageName": "Custom", "pageId": 1000, "widget":"data", "title":"Data sensor", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "order": 30}',
+        'data-control': '{"pageName": "Custom", "pageId": 1000, "widget":"data-control", "format":"int", "title":"Heater", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "order": 40}',
+    },
     init: function() {
         if (typeof jQuery == 'undefined') {
             this.showNotification('jQuery', 'IoT Control Center requires jQuery', 'dashboard-notification', 'danger');
@@ -506,6 +512,7 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
 
     $('#widget').change(function(e) {
         e.preventDefault();
+        $('.help-block.widgetJson').html('Example JSON Options: ' + iotCC.customSubscriptionWidgetJson[$(this).val()]);
         if ($(this).find('option:selected').data('action') == 'on') {
             $('.subscriptionAction').removeClass('hide');
         } else {
