@@ -4,11 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>IoT Control Center</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bower_components/Ionicons/css/ionicons.min.css">
 
     <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="bower_components/AdminLTE/dist/css/skins/_all-skins.min.css">
@@ -18,26 +17,22 @@
 <body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
 <div class="wrapper">
     <header class="main-header">
-        <!-- Logo -->
         <a href="#dashboard" class="logo">
-            <!-- mini logo for sidebar mini 50x50 pixels -->
             <span class="logo-mini"><b>IoT</b></span>
-            <!-- logo for regular state and mobile devices -->
             <span class="logo-lg"><b>IoT</b> Control Center</span>
         </a>
 
-        <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top">
-            <!-- Sidebar toggle button-->
             <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                 <span class="sr-only">Toggle navigation</span>
             </a>
-            <!-- Navbar Right Menu -->
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
-                    <!-- Control Sidebar Toggle Button -->
                     <li>
                         <a href="#" data-toggle="control-refresh" title="Refresh devices"><i class="fa fa-refresh"></i></a>
+                    </li>
+                    <li>
+                        <a href="#" data-toggle="control-console" title="Show/hide MQTT console"><i class="fa fa-paper-plane"></i></a>
                     </li>
                     <li>
                         <a href="#" data-toggle="control-sidebar"><i class="fa fa-gear"></i></a>
@@ -46,14 +41,9 @@
             </div>
         </nav>
     </header>
-    <!-- Left side column. contains the logo and sidebar -->
     <aside class="main-sidebar">
-        <!-- sidebar: style can be found in sidebar.less -->
         <section class="sidebar">
-            <!-- /.search form -->
-            <!-- sidebar menu: : style can be found in sidebar.less -->
             <ul class="sidebar-menu">
-                <!--li class="header">Options</li-->
                 <li class="active">
                     <a href="#" class="navigation" data-section="dashboard">
                         <i class="fa fa-dashboard"></i> <span>Dashboard</span>
@@ -76,7 +66,6 @@
                 </li>
             </ul>
         </section>
-        <!-- /.sidebar -->
     </aside>
 
     <!-- Content Wrapper. Contains page content -->
@@ -112,6 +101,27 @@
         <!-- Dashboard content -->
         <section class="content" data-section="dashboard">
 
+            <div class="box box-primary hide" id="mqttConsole">
+                <div class="box-header with-border">
+                    <h3 class="box-title">MQTT Console</h3>
+                </div>
+                <form role="form">
+                    <div class="box-body">
+                        <div class="form-group">
+                            <label for="mqttConsoleTopic">Topic</label>
+                            <input type="text" class="form-control" id="mqttConsoleTopic" placeholder="Enter topic">
+                        </div>
+                        <div class="form-group">
+                            <label for="mqttConsoleMessage">Message</label>
+                            <input type="text" class="form-control" id="mqttConsoleMessage" placeholder="Enter message">
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary" id="mqttConsoleSend">Send</button>
+                    </div>
+                </form>
+            </div>
+
             <div class="row dashboard-notification">
                 <div class="col-md-12">
                     <div class="tab-bar tab-bar--top tab-bar--material pagination hide">
@@ -132,13 +142,11 @@
         <section class="content hide" data-section="custom-subscriptions">
 
             <div class="row subscriptions-notification">
-                <div class="col-md-12">
+                <div class="col-md-9">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">Add new subscription</h3>
                         </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
                         <form id="customSubscriptions">
                             <div class="box-body">
                                 <div class="form-group">
@@ -156,13 +164,14 @@
                                     </select>
                                 </div>
                                 <div class="form-group subscriptionWidgetJson">
-                                    <label for="widgetJson">Widget JSON options</label>
-                                    <input type="text" class="form-control" id="widgetJson" name="widgetJson" placeholder="Widget JSON options" />
+                                    <label for="widgetJson">IoTCC Config</label>
+                                    <textarea class="form-control" id="widgetJson" name="widgetJson" placeholder="Widget JSON" rows="10"></textarea>
+                                    <button type="button" class="btn btn-primary beautify">Beautify JSON</button>
                                     <span class="help-block widgetJson"></span>
                                 </div>
                                 <div class="form-group subscriptionAction hide">
-                                    <label for="actionTopic">Widget action topic</label>
-                                    <input type="text" class="form-control" id="actionTopic" name="actionTopic" placeholder="Widget action topic" />
+                                    <label for="publishTopic">Widget publish topic</label>
+                                    <input type="text" class="form-control" id="publishTopic" name="publishTopic" placeholder="Widget publish topic" />
                                 </div>
                                 <div class="checkbox">
                                     <label for="active">
@@ -170,13 +179,41 @@
                                 </label>
                                 </div>
                             </div>
-                            <!-- /.box-body -->
-
                             <div class="box-footer">
                                 <button type="submit" class="btn btn-primary" id="saveSubscription">Save</button>
                             </div>
                             <input type="hidden" name="index" />
                         </form>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Widget Preview</h3>
+                        </div>
+                        <div class="box-body widget-preview">
+
+                        </div>
+                        <div class="box-body">
+                            <textarea class="form-control" id="widgetCodePreview" rows="10"></textarea>
+                            Available icons
+                            <ul>
+                                <li>
+                                    <a href="http://ionicons.com/" target="_blank">Ionicons</a>
+                                </li>
+                                <li>
+                                    <a href="http://fontawesome.io/icons/" target="_blank">Font Awesome</a>
+                                </li>
+                            </ul>
+                            Available templates
+                            <ul>
+                                <li>template-1</li>
+                                <li>template-2</li>
+                                <li>template-3</li>
+                                <li>template-4</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,7 +233,7 @@
                                         <th>Topic</th>
                                         <th>Widget</th>
                                         <th>Widget JSON</th>
-                                        <th>Action topic</th>
+                                        <th>Publish topic</th>
                                         <th>Active</th>
                                     </tr>
                                 </thead>
@@ -219,8 +256,6 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">MQTT connection data</h3>
                         </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
                         <form id="mqttConfig">
                             <div class="box-body">
                                 <div class="form-group">
@@ -259,8 +294,6 @@
                                 </label>
                                 </div>
                             </div>
-                            <!-- /.box-body -->
-
                             <div class="box-footer">
                                 <button type="submit" class="btn btn-primary" id="saveMqttConfig">Save</button>
                             </div>
@@ -275,8 +308,6 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Options</h3>
                         </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
                         <form id="appConfig">
                             <div class="box-body">
                                 <div class="checkbox">
@@ -290,8 +321,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <!-- /.box-body -->
-
                             <div class="box-footer">
                                 <button type="submit" class="btn btn-primary" id="saveAppConfig">Save</button>
                             </div>
@@ -306,8 +335,6 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Backup/Restore</h3>
                         </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
                         <form id="iotCCConfig">
                             <div class="box-body">
                                 <div class="form-group">
@@ -315,8 +342,6 @@
                                     <textarea class="form-control" id="iotccconfig" name="iotccconfig" placeholder="IoTCC Config" rows="10"></textarea>
                                 </div>
                             </div>
-                            <!-- /.box-body -->
-
                             <div class="box-footer">
                                 <button type="submit" class="btn btn-primary" id="saveIoTCCConfig">Save</button>
                             </div>
@@ -326,15 +351,21 @@
             </div>
 
         </section>
-        <!-- /.content -->
 
         <!-- Log content -->
         <section class="content hide" data-section="log">
-            <pre class="console"></pre>
+
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">MQTT Log</h3>
+                </div>
+                <div class="box-body">
+                    <pre class="console"></pre>
+                </div>
+            </div>
+
         </section>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
 
     <footer class="main-footer">
         <div class="pull-right hidden-xs">
@@ -343,21 +374,14 @@
         <strong>Copyright &copy; 2017 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
     </footer>
 
-    <!-- Control Sidebar -->
     <aside class="control-sidebar control-sidebar-dark">
-        <!-- Create the tabs -->
         <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
             <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-gear"></i></a></li>
         </ul>
-        <!-- Tab panes -->
         <div class="tab-content">
-            <!-- Home tab content -->
             <div class="tab-pane" id="control-sidebar-home-tab">
-
             </div>
-            <!-- /.tab-pane -->
 
-            <!-- Settings tab content -->
             <div class="tab-pane" id="control-sidebar-settings-tab">
                 <form method="post">
                     <h3 class="control-sidebar-heading">General Settings</h3>
@@ -372,18 +396,12 @@
                             Allow the user to show his name in blog posts
                         </p>
                     </div>
-                    <!-- /.form-group -->
                 </form>
             </div>
-            <!-- /.tab-pane -->
         </div>
     </aside>
-    <!-- /.control-sidebar -->
-    <!-- Add the sidebar's background. This div must be placed
-       immediately after the control sidebar -->
     <div class="control-sidebar-bg"></div>
 </div>
-<!-- ./wrapper -->
 
 <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>

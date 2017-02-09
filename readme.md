@@ -18,7 +18,9 @@ I had a few problems with it and decided to build my own control center with ide
 - TODO: create `scenarios` based on IoT data. if sensor1Temp < 10 then turn on heat
 - TODO: use NodeRed to create scenarios/notifications
 - BETA: subscribe to custom topics, assign template for display. To do configurator
+- TODO: custom subscriptions callbacks to parse the message data
 - TODO: OTA updates with widget configuration
+- TODO: optimizations
 
 How it works (WIP) :
 IoT CC subscribes to

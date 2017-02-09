@@ -91,9 +91,7 @@ var iotCC = {
             widgetId = iotCC.formatTopic(topic),
             widget, html;
             $('.dashboard-notification-html').remove();
-            if (iotCC.mqttConfig.debug) {
-                logger.log('Received Topic:= ' + topic + '\n\tMessage:= ' + message.toString());
-            }
+            logger.log('Received Topic:= ' + topic + '\n\tMessage:= ' + message.toString());
 
             if (topicPath[4] == 'config') {
                 var page = {'pageId': json.pageId, 'pageName': json.pageName, 'icon': json.icon};
@@ -101,10 +99,10 @@ var iotCC = {
                 var publishTopic = json.publishTopic ? json.publishTopic : json.topic + '/data';
                 if (json.widget == 'toggle') {
                     if ($('input[name="' + widgetId + '"]').exists() == false) {
-                        html = '<label class="switch switch--material {class4}">';
-                        html += '<input type="checkbox" name="' + widgetId + '" data-widget="toggle" data-status="' + (json.checked==true?'1':'0') + '" class="switch__input switch--material__input {class5}" ' + (json.checked==true?'checked="checked"':'') + '>';
-                        html += '<div class="switch__toggle switch--material__toggle {class6}">';
-                        html += '<div class="switch__handle switch--material__handle {class7}">';
+                        html = '<label class="switch switch--material {class10}">';
+                        html += '<input type="checkbox" name="' + widgetId + '" data-widget="toggle" data-status="' + (json.checked==true?'1':'0') + '" class="switch__input switch--material__input {class11}" ' + (json.checked==true?'checked="checked"':'') + '>';
+                        html += '<div class="switch__toggle switch--material__toggle {class12}">';
+                        html += '<div class="switch__handle switch--material__handle {class13}">';
                         html += '</div>';
                         html += '</div>';
                         html += '</label>';
@@ -114,10 +112,18 @@ var iotCC = {
                         json.callback = function() {
                             if ($(this).prop('checked') == true) {
                                 $(this).data('status', 1);
-                                iotCC.mqttClient.publish(publishTopic, '{"status":1}', {qos: 1, retained: false});
+                                var message = '{"status":1}';
+                                iotCC.mqttClient.publish(publishTopic, message, {qos: 1, retained: false});
+                                if (iotCC.mqttConfig.debug) {
+                                    logger.log('Publish Topic:= ' + publishTopic + '\n\tMessage:= ' + message.toString());
+                                }
                             } else {
                                 $(this).data('status', 0);
-                                iotCC.mqttClient.publish(publishTopic, '{"status":0}', {qos: 1, retained: false});
+                                var message = '{"status":0}';
+                                iotCC.mqttClient.publish(publishTopic, message, {qos: 1, retained: false});
+                                if (iotCC.mqttConfig.debug) {
+                                    logger.log('Publish Topic:= ' + publishTopic + '\n\tMessage:= ' + message);
+                                }
                             }
                         };
                         iotCC.addWidget(json);
@@ -129,17 +135,20 @@ var iotCC = {
                     if ($('input[name="' + widgetId + '"]').exists() == false) {
                         html = '';
                         $(json.options).each(function(k, v) {
-                            html += '<label class="radio-button radio-button--material {class3}">';
-                            html += '<input type="radio" name="' + widgetId + '" data-widget="radios" data-status="' + v.status + '" class="radio-button__input radio-button--material__input {class4}" name="r" ' + (v.checked==true?'checked="checked"':'') + '>';
-                            html += '<div class="radio-button__checkmark radio-button--material__checkmark {class5}">';
-                            html += '</div>';
+                            html += '<label class="radio-button radio-button--material {class10}">';
+                            html += '<input type="radio" name="' + widgetId + '" data-widget="radios" data-status="' + v.status + '" class="radio-button__input radio-button--material__input {class11}" name="r" ' + (v.checked==true?'checked="checked"':'') + ' />';
+                            html += '<div class="radio-button__checkmark radio-button--material__checkmark {class12}"></div>';
                             html += v.label +'</label>';
                         });
                         json.content = html;
                         json.widgetId = widgetId;
                         json.selector = 'input';
                         json.callback = function() {
-                            iotCC.mqttClient.publish(publishTopic, '{"status":"' + $(this).data('status') + '"}', {qos: 1, retained: false});
+                            var message = '{"status":"' + $(this).data('status') + '"}';
+                            iotCC.mqttClient.publish(publishTopic, message, {qos: 1, retained: false});
+                            if (iotCC.mqttConfig.debug) {
+                                logger.log('Publish Topic:= ' + publishTopic + '\n\tMessage:= ' + message);
+                            }
                         };
                         iotCC.addWidget(json);
                     } else {
@@ -151,9 +160,9 @@ var iotCC = {
                 } else if (json.widget == 'data' || json.widget == 'data-control') {
                     if ($('span[name="' + widgetId + '"]').exists() == false) {
                         html = '';
-                        if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material btn-xs">-</button> ';
-                        html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text">' + json.value + '</span> ' + (json.valuedescription?'<span class="text">' + json.valuedescription + '</span>':'') + '';
-                        if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material btn-xs">+</button>';
+                        if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material btn-xs {class10}">-</button> ';
+                        html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text {class11}">' + json.value + '</span> ' + (json.valuedescription?'<span class="text {class12}">' + json.valuedescription + '</span>':'') + '';
+                        if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material btn-xs {class13}">+</button>';
                         json.content = html;
                         json.widgetId = widgetId;
                         json.selector = 'button';
@@ -161,7 +170,11 @@ var iotCC = {
                             var action = $(this).data('action');
                             var value = $('span[name="' + $(this).attr('name') + '"]').data('value');
                             value = action == '+' ? iotCC.formatData(value, json.format) + 1 : iotCC.formatData(value, json.format) - 1;
-                            iotCC.mqttClient.publish(publishTopic, '{"value":"' + value + '"}', {qos: 1, retained: false});
+                            var message = '{"value":"' + value + '"}';
+                            iotCC.mqttClient.publish(publishTopic, message, {qos: 1, retained: false});
+                            if (iotCC.mqttConfig.debug) {
+                                logger.log('Publish Topic:= ' + publishTopic + '\n\tMessage:= ' + message);
+                            }
                         };
                         iotCC.addWidget(json);
                     } else {
@@ -305,6 +318,8 @@ var iotCC = {
         config.mqttConfig.debug = $('#debug').prop('checked');
         config.mqttConfig.simulateDevices = $('#simulateDevices').prop('checked');
 
+        this.mqttConfig = Object.assign(this.mqttConfig, config.mqttConfig);
+
         try {
             localStorage.setItem('iotCCConfig', JSON.stringify(config));
             iotCC.showNotification('MQTT connection data', 'Data saved succesfully', 'settings-notification1', 'info', 1.5);
@@ -378,11 +393,11 @@ var iotCC = {
             return parseFloat(v).toFixed(d);
         }
     },
-    parseTemplate: function(json, html) {
+    parseTemplate: function(json, html, debug) {
         for (var key in json) {
             html = html.replace('{' + key + '}', json[key]);
         }
-        if (this.appConfig.templateDebug == false) {
+        if (this.appConfig.templateDebug == false && debug == undefined) {
             html = html.replace(/{(\w*)}/g, '');
         }
         return html;
@@ -398,7 +413,7 @@ var iotCC = {
             html += '<td>' + subscription.topic + '</td>';
             html += '<td>' + subscription.widget + '</td>';
             html += '<td>' + subscription.widgetJson + '</td>';
-            html += '<td>' + subscription.actionTopic + '</td>';
+            html += '<td>' + subscription.publishTopic + '</td>';
             html += '<td>' + subscription.active + '</td>';
             html += '</tr>';
             $('.subscriptions-table').append(html);
@@ -410,11 +425,12 @@ var iotCC = {
             $('input[name="index"]').val( $(tr).find('td:eq(1)').html() );
             $('input[name="topic"]').val( $(tr).find('td:eq(2)').html() );
             $('select[name="widget"]').val( $(tr).find('td:eq(3)').html() ).trigger('change');
-            $('input[name="widgetJson"]').val( $(tr).find('td:eq(4)').html() );
-            $('input[name="actionTopic"]').val( $(tr).find('td:eq(5)').html() );
+            $('textarea[name="widgetJson"]').val( $(tr).find('td:eq(4)').html() );
+            $('input[name="publishTopic"]').val( $(tr).find('td:eq(5)').html() );
             $('input[name="active"]').prop('checked', $(tr).find('td:eq(6)').html()=='true'?true:false);
+            $('#widgetJson').trigger('keyup');
         });
-        $('.subscriptions-table').find('a.fa-remove').click(function(e){
+        $('.subscriptions-table').find('a.fa-remove').click(function(e) {
             e.preventDefault();
             var tr = $(this).parent().parent();
             var index = $(tr).find('td:eq(1)').html();
@@ -440,6 +456,7 @@ var iotCC = {
             var subscription = config.customSubscriptions[i];
             if (topic == subscription.topic) {
                 widgetJson = JSON.parse(subscription.widgetJson);
+                widgetJson.publishTopic = subscription.publishTopic;
                 if (subscription.widget == 'toggle') {
                     if (parseInt(message) > 0) {
                         widgetJson.checked = true;
@@ -509,16 +526,68 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
         iotCC.refreshDevices();
     });
 
+    $('a').filter('[data-toggle="control-console"]').click(function(e) {
+        e.preventDefault();
+        if ($('#mqttConsole').hasClass('hide')) {
+            $('#mqttConsole').removeClass('hide')
+        } else {
+            $('#mqttConsole').addClass('hide');
+        }
+    });
 
     $('#widget').change(function(e) {
         e.preventDefault();
-        $('.help-block.widgetJson').html('Example JSON Options: ' + iotCC.customSubscriptionWidgetJson[$(this).val()]);
+        var widgetJson = iotCC.customSubscriptionWidgetJson[$(this).val()];
+        $('.help-block.widgetJson').html('Example JSON Options: ' + widgetJson).click(function(e){
+            e.preventDefault();
+            $('.subscriptionWidgetJson-html').remove();
+            $('#widgetJson').val(JSON.stringify(JSON.parse(widgetJson), null, 4)).trigger('keyup');
+        });
+
         if ($(this).find('option:selected').data('action') == 'on') {
             $('.subscriptionAction').removeClass('hide');
         } else {
             $('.subscriptionAction').addClass('hide');
         }
     });
+
+    $('#widgetJson').keyup(function() {
+        $('.subscriptionWidgetJson-html').remove();
+        var val = $('#widgetJson').val();
+        if (val) {
+            try { json = JSON.parse(val); }
+            catch (e) {
+                iotCC.showNotification('JSON Error', 'Error in parsing json. ' + e, 'subscriptionWidgetJson', 'danger');
+                return;
+            }
+        } else {
+            return;
+        }
+        if (json.template) {
+            $.ajaxSetup({ cache: false });
+            $.get('assets/template/' + json.template + '.html', function(html) {
+                html = iotCC.parseTemplate(json, html, true);
+                $('.box-body.widget-preview').html(html);
+                var template = $('.box-body.widget-preview').find('.widgetcontainer').html();
+                $('.box-body.widget-preview').find('.widgetcontainer').replaceWith(template);
+                $('#widgetCodePreview').val(template.trim());
+            });
+        }
+    });
+
+    $('button.beautify').click(function() {
+        var val = $('#widgetJson').val();
+        if (val) {
+            try { json = JSON.parse(val); }
+            catch (e) {
+                return;
+            }
+        } else {
+            return;
+        }
+        $('#widgetJson').val(JSON.stringify(json, null, 4));
+    });
+
 
     $('#saveSubscription').click(function(e) {
         e.preventDefault();
@@ -538,6 +607,7 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
             iotCC.showNotification('Custom subscriptions', 'Data saved succesfully', 'subscriptions-notification', 'info', 1.5);
             iotCC.customSubscriptions();
             $('#customSubscriptions')[0].reset();
+            $('.help-block.widgetJson').html('');
         } catch(ex) {
             console.log (ex);
             iotCC.showNotification('Custom subscriptions', 'Cannot save data to local storage', 'subscriptions-notification', 'danger', 3);
@@ -556,6 +626,19 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
             iotCC.showNotification('IoTCC Config', 'Cannot save data to local storage', 'settings-notification3', 'danger', 3);
         }
     });
+
+    $('#mqttConsoleSend').click(function(e) {
+        e.preventDefault();
+        iotCC.mqttClient.publish($('#mqttConsoleTopic').val(), $('#mqttConsoleMessage').val(), {qos: 1, retained: false});
+        if (iotCC.mqttConfig.debug) {
+            logger.log('Console Publish Topic:= ' + $('#mqttConsoleTopic').val() + '\n\tMessage:= ' + $('#mqttConsoleMessage').val());
+        }
+    });
+
+    if (window.location.hash) {
+        var section = window.location.hash.replace("#", "");
+        $('a.navigation').filter('[data-section="' + section + '"]').trigger('click');
+    }
 
     iotCC.init();
 });
