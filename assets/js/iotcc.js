@@ -39,6 +39,7 @@ var iotCC = {
         'data': '{"pageName": "Custom", "pageId": 1000, "widget":"data", "title":"Data sensor", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "order": 30}',
         'data-control': '{"pageName": "Custom", "pageId": 1000, "widget":"data-control", "format":"int", "title":"Heater", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "order": 40}',
     },
+    charts: {},
     init: function() {
         if (typeof jQuery == 'undefined') {
             this.showNotification('jQuery', 'IoT Control Center requires jQuery', 'dashboard-notification', 'danger');
@@ -184,14 +185,14 @@ var iotCC = {
                 } else if (json.widget == 'chart.js') {
                     if ($('canvas[name="' + widgetId + '"]').exists() == false) {
                         html = '';
-                        html += '<canvas name="' + widgetId + '" data-widget="' + json.widget + '" data-chart="' + json.chart + '" class="{class11}"></canvas> ' + (json.valuedescription?'<span class="text {class12}">' + json.valuedescription + '</span>':'') + '';
+                        html += '<canvas name="' + widgetId + '" data-widget="' + json.widget + '" data-chart="' + json.chart + '" class="{class10}" width="{width}" height="{height}"></canvas> ' + (json.valuedescription?'<span class="text {class11}">' + json.valuedescription + '</span>':'') + '';
                         json.content = html;
                         json.widgetId = widgetId;
                         iotCC.addWidget(json, function() {
-                            iotCC.createChart(widgetId, json.chart, json.value);
+                            iotCC.createChart(widgetId, json);
                         });
                     } else {
-                        iotCC.createChart(widgetId, json.chart, json.value);
+                        iotCC.createChart(widgetId, json);
                         iotCC.animate($('canvas[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
                 }
@@ -215,7 +216,7 @@ var iotCC = {
                     }
                 } else if (widget == 'chart.js') {
                     var chart = $('canvas[name="' + widgetId + '"]').first().data('chart');
-                    iotCC.createChart(widgetId, chart, json.value);
+                    iotCC.createChart(widgetId, {chart: chart, value: json.value});
                 }
             } else if (topicPath[3] == 'device') {
                 $(json.pages).each(function(k, page) {
@@ -416,6 +417,8 @@ var iotCC = {
         }
     },
     parseTemplate: function(json, html, debug) {
+        html = html.replace('{content}', json.content);
+        delete json['content'];
         for (var key in json) {
             html = html.replace('{' + key + '}', json[key]);
         }
@@ -501,12 +504,18 @@ var iotCC = {
             }
         }
     },
-    createChart: function(id, chart, data) {
+    createChart: function(id, json) {
+        if (this.charts[id]) {
+            this.charts[id].destroy();
+        }
         var pieChartCanvas = $('canvas[name="' + id + '"]').get(0).getContext("2d");
-        var myPieChart = new Chart(pieChartCanvas, {
-            type: chart.replace('chart', ''),
-            data: data,
-            options: {}
+        this.charts[id] = new Chart(pieChartCanvas, {
+            type: json.chart,
+            data: json.value,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
         });
     }
 }
