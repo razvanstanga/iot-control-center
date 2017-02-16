@@ -20,16 +20,20 @@ I had a few problems with it and decided to build my own control center with ide
 - BETA: subscribe to custom topics, assign template for display. To do configurator
 - TODO: custom subscriptions callbacks to parse the message data
 - TODO: OTA updates with widget configuration
+- TODO: /iotcc/+/+/confirm. IoT confirmation of received message
 - TODO: optimizations
 
 How it works (WIP) :
 IoT CC subscribes to
 - /iotcc/+/+/config
 - /iotcc/+/+/data
+- /iotcc/+/+/confirm
 - /iotcc/+/device
 
 IoT CC publishes to
 - /iotcc/device - {"clientId": "{clientId}"}
+- /iotcc/+/+/data - {"status":"{status}", "clientId": "{clientId}"}
+- /iotcc/+/+/data - {"value":"{value}", "clientId": "{clientId}"}
 
 IoT devices subscribe to
 - /iotcc/+/+/data
@@ -38,7 +42,7 @@ IoT devices subscribe to
 IoT devices publish to :
 - /iotcc/+/device - {"name":"House heating 1","desc":"", "pages" : [{"pageId" : 10, "pageName" : "House heating", "icon": "ion-ios-home"}]}
 - /iotcc/+/+/config - {"pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-3", "icon": "ion-ios-home", "bgcolor": "bg-blue", "order": 40}
-- /iotcc/+/+/data - {"status":"{status}"}
+- /iotcc/+/+/confirm - {"status":"{status}"}
 
 ### Desktop interface (WIP)
 ![Alt text](/screenshots/dashboard-desktop.png?raw=true "Desktop interface")

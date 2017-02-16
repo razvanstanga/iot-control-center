@@ -10,6 +10,7 @@ iotCC.addEvent('message', function(json, widgetId, topic, topicPath) {
         return;
     }
     if (topicPath[2] == 'device') {
+
         iotCC.mqttClient.publish('/iotcc/heater1/device', '{"name":"House heating 1","desc":"", "pages" : [{"pageId": 10, "pageName": "House heating", "icon": "ion-ios-home", "class1":"bg-blue", "order": "10"}]}', {qos: 1, retained: false});
         iotCC.mqttClient.publish('/iotcc/heater1/heater/config', '{"pageName": "House heating", "pageId": 10, "widget":"radios", "title":"Hollway Heater", "topic":"/iotcc/heater1/heater", "options":[{"checked":true, "label": "Off", "status":"1"}, {"label": "Confort", "status":"2"}, {"label": "Anti freeze", "status":"3"}, {"label": "Confort -2", "status":"4"}], "template": "template-1", "icon": "ion-ios-home", "class4": "bg-blue", "order": 40}', {qos: 1, retained: false});
 
@@ -43,5 +44,9 @@ iotCC.addEvent('message', function(json, widgetId, topic, topicPath) {
         iotCC.mqttClient.publish('/iotcc/greenhouse/tempsensor1/data', '{"value":"' + (Math.floor(Math.random() * (10)) + 20) + '"}');
         iotCC.mqttClient.publish('/iotcc/greenhouse/heater/config', '{"pageName": "Greenhouse", "pageId": 40, "widget":"data-control", "format":"int", "title":"Heater", "topic":"/iotcc/greenhouse/heater", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "class10": "xs", "order": 30}', {qos: 1, retained: false});
         iotCC.mqttClient.publish('/iotcc/greenhouse/heater/data', '{"value":"' + (Math.floor(Math.random() * (10)) + 20) + '"}');
+
+        iotCC.mqttClient.publish('/iotcc/watertank/device', '{"name":"Watertank","desc":"", "pages" : [{"pageId" : 1000, "pageName" : "Watertank", "icon": "ion-ios-home", "class1":"bg-green", "order": "100"}]}', {qos: 1, retained: false});
+        iotCC.mqttClient.publish('/iotcc/watertank/level/config', '{"pageName": "Greenhouse", "pageId": 1000, "widget": "chart.js", "chart": "pie", "title": "Watertank level", "topic":"/iotcc/watertank/level", "value": {"labels": ["Full", "Empty"], "datasets": [{"data": [70, 30], "backgroundColor": ["#3c8dbc", "#fff"], "hoverBackgroundColor": [ "#3c8dbc", "#fff"]}]}, "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "order": 30}', {qos: 1, retained: false});
+        iotCC.mqttClient.publish('/iotcc/watertank/level1/config', '{"pageName": "Greenhouse", "pageId": 1000, "widget": "chart.js", "chart": "doughnut", "title": "Watertank level 2", "topic":"/iotcc/watertank/level2", "value": {"labels": ["Full", "Empty"], "datasets": [{"data": [70, 30], "backgroundColor": ["#3c8dbc", "#fff"], "hoverBackgroundColor": [ "#3c8dbc", "#fff"]}]}, "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "order": 30}', {qos: 1, retained: false});
     }
 });

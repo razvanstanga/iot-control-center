@@ -181,6 +181,19 @@ var iotCC = {
                         $('span[name="' + widgetId + '"]').html(json.value).data('value', json.value);
                         iotCC.animate($('span[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
+                } else if (json.widget == 'chart.js') {
+                    if ($('canvas[name="' + widgetId + '"]').exists() == false) {
+                        html = '';
+                        html += '<canvas name="' + widgetId + '" data-widget="' + json.widget + '" data-chart="' + json.chart + '" class="{class11}"></canvas> ' + (json.valuedescription?'<span class="text {class12}">' + json.valuedescription + '</span>':'') + '';
+                        json.content = html;
+                        json.widgetId = widgetId;
+                        iotCC.addWidget(json, function() {
+                            iotCC.createChart(widgetId, json.chart, json.value);
+                        });
+                    } else {
+                        iotCC.createChart(widgetId, json.chart, json.value);
+                        iotCC.animate($('canvas[name="' + widgetId + '"]').closest(".widgetcontainer"));
+                    }
                 }
             } else if (topicPath[4] == 'data') {
                 widget = $('*[name="' + widgetId + '"]').first().data('widget');
@@ -200,6 +213,9 @@ var iotCC = {
                     if ($('span[name="' + widgetId + '"]').exists() == true) {
                         $('span[name="' + widgetId + '"]').html(json.value).data('value', json.value);
                     }
+                } else if (widget == 'chart.js') {
+                    var chart = $('canvas[name="' + widgetId + '"]').first().data('chart');
+                    iotCC.createChart(widgetId, chart, json.value);
                 }
             } else if (topicPath[3] == 'device') {
                 $(json.pages).each(function(k, page) {
@@ -223,14 +239,20 @@ var iotCC = {
     formatTopic: function(topic) {
         return topic.replace(/\//gi, '_').replace(/:/gi, '_').replace('_data', '').replace('_config', '');
     },
-    addWidget: function(json) {
+    addWidget: function(json, callback) {
         if (this.templates[json.template] != undefined) {
             iotCC.addHtml(json, this.templates[json.template]);
+            if (callback) {
+                callback();
+            }
         } else {
             // TODO : fetch custom templates over HTTP
             $.get('assets/template/' + json.template + '.html', function(html) {
                 iotCC.templates[json.template] = html;
                 iotCC.addHtml(json, html);
+                if (callback) {
+                    callback();
+                }
             });
         }
     },
@@ -478,6 +500,14 @@ var iotCC = {
                 iotCC.mqttClient.publish('/iotcc/customSubscription/' + i + '/config', widgetJson, {qos: 1, retained: false});
             }
         }
+    },
+    createChart: function(id, chart, data) {
+        var pieChartCanvas = $('canvas[name="' + id + '"]').get(0).getContext("2d");
+        var myPieChart = new Chart(pieChartCanvas, {
+            type: chart.replace('chart', ''),
+            data: data,
+            options: {}
+        });
     }
 }
 
