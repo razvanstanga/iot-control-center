@@ -303,13 +303,13 @@ var iotCC = {
     addPage: function(page) {
         $('label').filter('[data-pagination="0"]').parent().removeClass('hide');
         if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
-            if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == true) {
-                var html = '<div class="row page" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
-            } else {
-                var html = '<div class="row page hide" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
+            var html = '<div class="row page" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
+            var hidePageContainer = false;
+            if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == false) {
+                hidePageContainer = true;
             }
             if (iotCC.appConfig.pageContainer) {
-                var html2 = '<div class="box pagecontainer {class}" data-page="' + page.pageId + '" data-order="' + page.order + '">';
+                var html2 = '<div class="box pagecontainer ' + (hidePageContainer?'hide':'') + ' {class}" data-page="' + page.pageId + '" data-order="' + page.order + '">';
                 html2 += '<div class="box-header with-border {class1}">';
                 html2 += '<h3 class="box-title {class2}">' + page.pageName + '</h3>';
                 if (page.icon) html2 += '<div class="box-tools pull-right ' + page.icon + '"></div>';
