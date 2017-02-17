@@ -40,6 +40,7 @@ var iotCC = {
         'data-control': '{"pageName": "Custom", "pageId": 1000, "widget":"data-control", "format":"int", "title":"Heater", "value": "22", "valuedescription": "degrees C", "template": "template-3", "icon": "ion-ios-home", "class": "bg-green", "class2": "text-center", "order": 40}',
     },
     charts: {},
+    gauges: {},
     init: function() {
         if (typeof jQuery == 'undefined') {
             this.showNotification('jQuery', 'IoT Control Center requires jQuery', 'dashboard-notification', 'danger');
@@ -195,6 +196,21 @@ var iotCC = {
                         iotCC.createChart(widgetId, json);
                         iotCC.animate($('canvas[name="' + widgetId + '"]').closest(".widgetcontainer"));
                     }
+                } else if (json.widget == 'gauge') {
+                    if ($('div[name="' + widgetId + '"]').exists() == false) {
+                        html = '';
+                        html += '<div name="' + widgetId + '" id="' + widgetId + '" data-widget="' + json.widget + '" data-minvalue="' + json.minValue + '" data-maxvalue="' + json.maxValue + '" class="{class10}" width="{width}" height="{height}"></div> ' + (json.valuedescription?'<span class="text {class11}">' + json.valuedescription + '</span>':'') + '';
+                        json.content = html;
+                        json.widgetId = widgetId;
+                        iotCC.addWidget(json, function() {
+                            iotCC.createGauge(widgetId, json);
+                        });
+                    } else {
+                        json.minValue = $('div[name="' + widgetId + '"]').data('minvalue');
+                        json.maxValue = $('div[name="' + widgetId + '"]').data('maxvalue');
+                        iotCC.createGauge(widgetId, json);
+                        iotCC.animate($('div[name="' + widgetId + '"]').closest(".widgetcontainer"));
+                    }
                 }
             } else if (topicPath[4] == 'data') {
                 widget = $('*[name="' + widgetId + '"]').first().data('widget');
@@ -217,6 +233,10 @@ var iotCC = {
                 } else if (widget == 'chart.js') {
                     var chart = $('canvas[name="' + widgetId + '"]').first().data('chart');
                     iotCC.createChart(widgetId, {chart: chart, value: json.value});
+                } else if (widget == 'gauge') {
+                    var minValue = $('div[name="' + widgetId + '"]').first().data('minvalue');
+                    var maxValue = $('div[name="' + widgetId + '"]').first().data('maxvalue');
+                    iotCC.createGauge(widgetId, {minValue: minValue, maxValue: maxValue, value: json.value});
                 }
             } else if (topicPath[3] == 'device') {
                 $(json.pages).each(function(k, page) {
@@ -516,6 +536,20 @@ var iotCC = {
                 responsive: true,
                 maintainAspectRatio: true
             }
+        });
+    },
+    createGauge: function(id, json) {
+        if (this.gauges[id]) {
+            this.gauges[id].destroy();
+        }
+        this.gauges[id] = new JustGage({
+            id: id,
+            value: json.value,
+            min: json.minValue || 0,
+            max: json.maxValue || 100,
+            label: json.valuedescription || '',
+            symbol: json.symbol || '',
+            levelColors: json.invertColors ? ["#ff0000", "#f9c802", "#a9d70b"] : ["#a9d70b", "#f9c802", "#ff0000"]
         });
     }
 }
