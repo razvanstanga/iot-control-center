@@ -263,15 +263,15 @@ var iotCC = {
     addWidget: function(json, callback) {
         if (this.templates[json.template] != undefined) {
             iotCC.addHtml(json, this.templates[json.template]);
-            if (callback) {
+            if ($.isFunction(callback)) {
                 callback();
             }
         } else {
-            // TODO : fetch custom templates over HTTP
+            // TODO : fetch custom templates over HTTP or html field from custom subscriptions
             $.get('assets/template/' + json.template + '.html', function(html) {
                 iotCC.templates[json.template] = html;
                 iotCC.addHtml(json, html);
-                if (callback) {
+                if ($.isFunction(callback)) {
                     callback();
                 }
             });
@@ -287,7 +287,7 @@ var iotCC = {
         }
 
         $(section).find('div.page[data-page="' + json.pageId + '"]').append(html);
-        if (json.callback != undefined) {
+        if ($.isFunction(json.callback)) {
             $(json.selector + '[name="' + json.widgetId + '"]').click(json.callback);
         }
         $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.widgetcontainer').sort(function(a,b) {
@@ -369,6 +369,7 @@ var iotCC = {
         } catch(ex) {
             iotCC.showNotification('MQTT connection data', 'Cannot save data to local storage', 'settings-notification1', 'danger', 3);
         }
+        this.clearSession();
     },
     getConfig: function() {
         try {
@@ -420,6 +421,7 @@ var iotCC = {
         this.mqttClient.publish('/iotcc/device', '{"clientId": "' + this.mqttConfig.clientId + '"}', {qos: 1, retained: false});
     },
     addEvent: function(on, callback) {
+        if (!$.isFunction(callback)) return;
         if (on == 'connect') {
             this.events.connect.push(callback);
         } else if (on == 'message') {
@@ -551,11 +553,21 @@ var iotCC = {
             symbol: json.symbol || '',
             levelColors: json.invertColors ? ["#ff0000", "#f9c802", "#a9d70b"] : ["#a9d70b", "#f9c802", "#ff0000"]
         });
+    },
+    clearSession: function() {
+        iotCC.mqttClient.end();
+        $('div.pagecontainer').remove();
+        $('div.pagination').addClass('hide').find('label').each(function(k,v){
+            if ($(this).data('pagination') > 0) {
+                $(this).remove();
+            }
+        });
+        this.init();
     }
 }
 
 jQuery.fn.exists = function(){return ($(this).length > 0);}
- $(document).ready(function(){
+$(document).ready(function() {
 
     $('.navigation').click(function(e) {
         e.preventDefault();
@@ -564,6 +576,9 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
         $(this).parent().addClass('active');
         $('section.content,section.content-header').addClass('hide');
         $('section.content,section.content-header').filter('[data-section="' + section + '"]').removeClass('hide');
+        if (!$('body').hasClass('sidebar-collapse')) {
+            $('.sidebar-toggle').trigger('click');
+        }
     });
 
     $('label').filter('[data-pagination="0"]').click(function(e){
@@ -592,6 +607,7 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
         } catch(ex) {
             iotCC.showNotification('Options', 'Cannot save data to local storage', 'settings-notification2', 'danger', 3);
         }
+        iotCC.clearSession();
     });
 
     $('a').filter('[data-toggle="control-refresh"]').click(function(e) {
@@ -685,6 +701,7 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
             console.log (ex);
             iotCC.showNotification('Custom subscriptions', 'Cannot save data to local storage', 'subscriptions-notification', 'danger', 3);
         }
+        iotCC.clearSession();
     });
 
     $('#saveIoTCCConfig').click(function(e) {
@@ -698,6 +715,7 @@ jQuery.fn.exists = function(){return ($(this).length > 0);}
             console.log (ex);
             iotCC.showNotification('IoTCC Config', 'Cannot save data to local storage', 'settings-notification3', 'danger', 3);
         }
+        iotCC.clearSession();
     });
 
     $('#mqttConsoleSend').click(function(e) {
