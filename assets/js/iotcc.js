@@ -377,7 +377,7 @@ var iotCC = {
             this.mqttConfig = Object.assign(this.mqttDefaultConfig, config.mqttConfig);
             for(var key in this.mqttConfig) {
                 var value = this.mqttConfig[key];
-                if (value == true || false) {
+                if (value == true || value == false) {
                     $('input[name="' + key + '"]').prop("checked", value);
                 } else {
                     $('input[name="' + key + '"]').val(value);
@@ -387,7 +387,7 @@ var iotCC = {
             this.appConfig = Object.assign(this.appConfig, config.appConfig);
             for(var key in this.appConfig) {
                 var value = this.appConfig[key];
-                if (value == true || false) {
+                if (value == true || value == false) {
                     $('input[name="' + key + '"]').prop("checked", value);
                 } else {
                     $('input[name="' + key + '"]').val(value);
