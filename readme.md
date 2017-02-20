@@ -22,6 +22,7 @@ I had a few problems with it and decided to build my own control center with ide
 - TODO: OTA updates with widget configuration
 - TODO: /iotcc/+/+/confirm. IoT confirmation of received message
 - TODO: optimizations
+- TODO: store multiple configurations
 
 How it works (WIP) :
 IoT CC subscribes to

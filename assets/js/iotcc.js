@@ -47,7 +47,7 @@ var iotCC = {
             logger.log ('IoT Control center requires jQuery');
             return;
         }
-        this.getConfig();
+        this.setConfig();
         // TODO: check for localStorage object
 
         this.showNotification('Connecting to MQTT server', 'Trying to connect to ' + this.mqttConfig.host + ':' + this.mqttConfig.port, 'dashboard-notification', 'info');
@@ -84,7 +84,7 @@ var iotCC = {
             iotCC.handleCustomSubscriptions(topic, message);
             try {
                 var json = JSON.parse(message.toString());
-            } catch(err){
+            } catch(err) {
                 logger.log ('There was a problem decoding the JSON message:\n\t' + message.toString());
                 logger.log (err);
                 return;
@@ -294,7 +294,7 @@ var iotCC = {
              return $(a).data('order') > $(b).data('order');
         }).appendTo('div.page[data-page="' + json.pageId + '"]');
         $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.visible-sm-block').remove();
-        $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.widgetcontainer').each(function(k,v){
+        $(section).find('div.page[data-page="' + json.pageId + '"]').find('div.widgetcontainer').each(function(k,v) {
             if ((k+1)%2 == 0) {
                 $(v).after('<div class="clearfix visible-sm-block"></div>');
             }
@@ -339,7 +339,7 @@ var iotCC = {
             html += '</button>';
             html += '</label>';
             $('.pagination').append(html);
-            $('label').filter('[data-pagination="' + page.pageId + '"]').click(function(e){
+            $('label').filter('[data-pagination="' + page.pageId + '"]').click(function(e) {
                 var pageId = $(this).data('pagination');
                 if (iotCC.appConfig.pageContainer) {
                     $('div.pagecontainer').addClass('hide');
@@ -354,51 +354,30 @@ var iotCC = {
             }).appendTo('div.pagination');
         }
     },
-    saveConfig: function() {
-        var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
-        config.mqttConfig = $('#mqttConfig').serializeObject();
-        config.mqttConfig.secure = $('#secure').prop('checked');
-        config.mqttConfig.debug = $('#debug').prop('checked');
-        config.mqttConfig.simulateDevices = $('#simulateDevices').prop('checked');
-
-        this.mqttConfig = Object.assign(this.mqttConfig, config.mqttConfig);
-
-        try {
-            localStorage.setItem('iotCCConfig', JSON.stringify(config));
-            iotCC.showNotification('MQTT connection data', 'Data saved succesfully', 'settings-notification1', 'info', 1.5);
-        } catch(ex) {
-            iotCC.showNotification('MQTT connection data', 'Cannot save data to local storage', 'settings-notification1', 'danger', 3);
-        }
-        this.clearSession();
-    },
-    getConfig: function() {
+    setConfig: function() {
         try {
             var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
             this.mqttConfig = Object.assign(this.mqttDefaultConfig, config.mqttConfig);
-            for(var key in this.mqttConfig) {
-                var value = this.mqttConfig[key];
-                if (value == true || value == false) {
-                    $('input[name="' + key + '"]').prop("checked", value);
-                } else {
-                    $('input[name="' + key + '"]').val(value);
-                }
-            }
+            this.setConfigInSettings(this.mqttConfig);
 
             this.appConfig = Object.assign(this.appConfig, config.appConfig);
-            for(var key in this.appConfig) {
-                var value = this.appConfig[key];
-                if (value == true || value == false) {
-                    $('input[name="' + key + '"]').prop("checked", value);
-                } else {
-                    $('input[name="' + key + '"]').val(value);
-                }
-            }
+            this.setConfigInSettings(this.appConfig);
             $('#iotccconfig').html(localStorage.getItem('iotCCConfig'));
         } catch(ex) {
             console.log (ex);
             return;
         }
         return config;
+    },
+    setConfigInSettings: function(config) {
+        for(var key in config) {
+            var value = config[key];
+            if (value == true || value == false) {
+                $('input[name="' + key + '"]').prop("checked", value);
+            } else {
+                $('input[name="' + key + '"]').val(value);
+            }
+        }
     },
     showNotification: function(title, content, prepend, type, timer) {
         var html = '<div class="col-md-12 ' + prepend + '-html">';
@@ -466,7 +445,7 @@ var iotCC = {
             $('.subscriptions-table').append(html);
             if (subscription.topic) this.mqttClient.subscribe(subscription.topic, {qos: 1});
         }
-        $('.subscriptions-table').find('a.fa-edit').click(function(e){
+        $('.subscriptions-table').find('a.fa-edit').click(function(e) {
             e.preventDefault();
             var tr = $(this).parent().parent();
             $('input[name="index"]').val( $(tr).find('td:eq(1)').html() );
@@ -476,6 +455,7 @@ var iotCC = {
             $('input[name="publishTopic"]').val( $(tr).find('td:eq(5)').html() );
             $('input[name="active"]').prop('checked', $(tr).find('td:eq(6)').html()=='true'?true:false);
             $('#widgetJson').trigger('keyup');
+            iotCC.clearSession();
         });
         $('.subscriptions-table').find('a.fa-remove').click(function(e) {
             e.preventDefault();
@@ -489,11 +469,11 @@ var iotCC = {
 
                 localStorage.setItem('iotCCConfig', JSON.stringify(config));
                 iotCC.showNotification('Custom subscriptions', 'Data deleted succesfully', 'subscriptions-notification', 'info', 1.5);
-                iotCC.customSubscriptions();
             } catch(ex) {
                 console.log (ex);
                 iotCC.showNotification('Custom subscriptions', 'Cannot save data to local storage', 'subscriptions-notification', 'danger', 3);
             }
+            iotCC.clearSession();
         });
     },
     handleCustomSubscriptions: function(topic, message) {
@@ -555,9 +535,10 @@ var iotCC = {
         });
     },
     clearSession: function() {
-        iotCC.mqttClient.end();
+        this.mqttClient.end();
         $('div.pagecontainer').remove();
-        $('div.pagination').addClass('hide').find('label').each(function(k,v){
+        $('div.widgetcontainer').remove();
+        $('div.pagination').addClass('hide').find('label').each(function(k,v) {
             if ($(this).data('pagination') > 0) {
                 $(this).remove();
             }
@@ -566,7 +547,7 @@ var iotCC = {
     }
 }
 
-jQuery.fn.exists = function(){return ($(this).length > 0);}
+jQuery.fn.exists = function() {return ($(this).length > 0);}
 $(document).ready(function() {
 
     $('.navigation').click(function(e) {
@@ -576,12 +557,12 @@ $(document).ready(function() {
         $(this).parent().addClass('active');
         $('section.content,section.content-header').addClass('hide');
         $('section.content,section.content-header').filter('[data-section="' + section + '"]').removeClass('hide');
-        if (!$('body').hasClass('sidebar-collapse')) {
+        if ($('body').hasClass('sidebar-open') || $('body').hasClass('sidebar-collapse') == false) {
             $('.sidebar-toggle').trigger('click');
         }
     });
 
-    $('label').filter('[data-pagination="0"]').click(function(e){
+    $('label').filter('[data-pagination="0"]').click(function(e) {
         if (iotCC.appConfig.pageContainer) {
             $('div.pagecontainer').removeClass('hide');
         } else {
@@ -591,12 +572,26 @@ $(document).ready(function() {
 
     $('#saveMqttConfig').click(function(e) {
         e.preventDefault();
-        iotCC.saveConfig();
+        var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+        config.mqttConfig = $('#mqttConfig').serializeObject() || {};
+        config.mqttConfig.secure = $('#secure').prop('checked');
+        config.mqttConfig.debug = $('#debug').prop('checked');
+        config.mqttConfig.simulateDevices = $('#simulateDevices').prop('checked');
+
+        iotCC.mqttConfig = Object.assign(iotCC.mqttConfig, config.mqttConfig);
+
+        try {
+            localStorage.setItem('iotCCConfig', JSON.stringify(config));
+            iotCC.showNotification('MQTT connection data', 'Data saved succesfully', 'settings-notification1', 'info', 1.5);
+        } catch(ex) {
+            iotCC.showNotification('MQTT connection data', 'Cannot save data to local storage', 'settings-notification1', 'danger', 3);
+        }
+        iotCC.clearSession();
     });
 
     $('#saveAppConfig').click(function(e) {
         e.preventDefault();
-        var config = JSON.parse(localStorage.getItem('iotCCConfig'));
+        var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
         config.appConfig = $('#appConfig').serializeObject();
         config.appConfig.pageContainer = $('#pageContainer').prop('checked');
         config.appConfig.templateDebug = $('#templateDebug').prop('checked');
@@ -627,7 +622,7 @@ $(document).ready(function() {
     $('#widget').change(function(e) {
         e.preventDefault();
         var widgetJson = iotCC.customSubscriptionWidgetJson[$(this).val()];
-        $('.help-block.widgetJson').html('Example JSON Options: ' + widgetJson).click(function(e){
+        $('.help-block.widgetJson').html('Example JSON Options: ' + widgetJson).click(function(e) {
             e.preventDefault();
             $('.subscriptionWidgetJson-html').remove();
             $('#widgetJson').val(JSON.stringify(JSON.parse(widgetJson), null, 4)).trigger('keyup');
@@ -694,7 +689,6 @@ $(document).ready(function() {
 
             localStorage.setItem('iotCCConfig', JSON.stringify(config));
             iotCC.showNotification('Custom subscriptions', 'Data saved succesfully', 'subscriptions-notification', 'info', 1.5);
-            iotCC.customSubscriptions();
             $('#customSubscriptions')[0].reset();
             $('.help-block.widgetJson').html('');
         } catch(ex) {
