@@ -397,7 +397,7 @@ var iotCC = {
         }
     },
     refreshDevices: function() {
-        this.mqttClient.publish('/iotcc/device', '{"clientId": "' + this.mqttConfig.clientId + '"}', {qos: 1, retained: false});
+        this.mqttClient.publish('/iotcc/device', '{"clientId": "' + this.mqttConfig.clientId + '", "time": "' + (new Date().getTime() / 1000) + '"}', {qos: 1, retained: false});
     },
     addEvent: function(on, callback) {
         if (!$.isFunction(callback)) return;
