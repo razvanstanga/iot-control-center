@@ -76,9 +76,11 @@ var iotCC = {
         this.mqttClient.subscribe('/+/+/+/config', {qos: 1});
         this.mqttClient.subscribe('/+/+/+/data', {qos: 1});
         this.mqttClient.subscribe('/+/+/device', {qos: 1});
+        this.mqttClient.subscribe('/+/+/confirm', {qos: 1});
 
         this.refreshDevices();
         this.customSubscriptions();
+        this.customTemplates();
 
         this.mqttClient.on('message', function(topic, message, packet) {
             iotCC.handleCustomSubscriptions(topic, message);
@@ -476,6 +478,50 @@ var iotCC = {
             iotCC.clearSession();
         });
     },
+    customTemplates: function() {
+        var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+        $('.templates-table').find('tr').remove();
+        for (i in config.customTemplates) {
+            var template = config.customTemplates[i];
+            var html = '<tr>';
+            html += '<td><a href="#" class="btn fa fa-edit"></a><a href="#" class="btn fa fa-remove"></a></td>';
+            html += '<td>' + i + '</td>';
+            html += '<td>' + template.title + '</td>';
+            html += '<td>' + template.active + '</td>';
+            html += '</tr>';
+            $('.templates-table').append(html);
+        }
+        $('.templates-table').find('a.fa-edit').click(function(e) {
+            e.preventDefault();
+            var tr = $(this).parent().parent();
+            $('input[name="index"]').val( $(tr).find('td:eq(1)').html() );
+            $('input[name="title"]').val( $(tr).find('td:eq(2)').html() );
+            $('input[name="active"]').prop('checked', $(tr).find('td:eq(3)').html()=='true'?true:false);
+            var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+            var data = config.customTemplates || [];
+            $('textarea[name="templateHtml"]').val( data[$(tr).find('td:eq(1)').html()].templateHtml );
+            $("#templateHtml").trigger('keyup');
+            iotCC.clearSession();
+        });
+        $('.templates-table').find('a.fa-remove').click(function(e) {
+            e.preventDefault();
+            var tr = $(this).parent().parent();
+            var index = $(tr).find('td:eq(1)').html();
+            try {
+                var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+                var data = config.customTemplates || [];
+                data.splice(index);
+                config.customTemplates = data;
+
+                localStorage.setItem('iotCCConfig', JSON.stringify(config));
+                iotCC.showNotification('Custom templates', 'Data deleted succesfully', 'templates-notification', 'info', 1.5);
+            } catch(ex) {
+                console.log (ex);
+                iotCC.showNotification('Custom templates', 'Cannot save data to local storage', 'templates-notification', 'danger', 3);
+            }
+            iotCC.clearSession();
+        });
+    },
     handleCustomSubscriptions: function(topic, message) {
         message = message.toString();
         var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
@@ -672,7 +718,6 @@ $(document).ready(function() {
         $('#widgetJson').val(JSON.stringify(json, null, 4));
     });
 
-
     $('#saveSubscription').click(function(e) {
         e.preventDefault();
         var form = $('#customSubscriptions').serializeObject();
@@ -696,6 +741,37 @@ $(document).ready(function() {
             iotCC.showNotification('Custom subscriptions', 'Cannot save data to local storage', 'subscriptions-notification', 'danger', 3);
         }
         iotCC.clearSession();
+    });
+
+    $('#saveTemplate').click(function(e) {
+        e.preventDefault();
+        var form = $('#customTemplates').serializeObject();
+        form.active = $('#active2').prop('checked');
+        try {
+            var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+            var data = config.customTemplates || [];
+            if (form.index) {
+                data[form.index] = form;
+            } else {
+                data.push(form);
+            }
+            config.customTemplates = data;
+
+            localStorage.setItem('iotCCConfig', JSON.stringify(config));
+            iotCC.showNotification('Custom templates', 'Data saved succesfully', 'templates-notification', 'info', 1.5);
+            $('#customTemplates')[0].reset();
+            $('.template-preview').html('');
+        } catch(ex) {
+            console.log (ex);
+            iotCC.showNotification('Custom templates', 'Cannot save data to local storage', 'templates-notification', 'danger', 3);
+        }
+        iotCC.clearSession();
+    });
+
+    $("#templateHtml").keyup(function() {
+        $('.template-preview').html('');
+        var val = $('#templateHtml').val();
+        $('.template-preview').html(val);
     });
 
     $('#saveIoTCCConfig').click(function(e) {
