@@ -98,7 +98,7 @@ var iotCC = {
             logger.log('Received Topic:= ' + topic + '\n\tMessage:= ' + message.toString());
 
             if (topicPath[4] == 'config') {
-                var page = {'pageId': json.pageId, 'pageName': json.pageName, 'icon': json.icon};
+                var page = {'pageId': json.pageId, 'pageName': json.pageName, 'icon': json.icon, 'order': json.pageOrder};
                 iotCC.addPage(page);
                 var publishTopic = json.publishTopic ? json.publishTopic : json.topic + '/data';
                 if (json.widget == 'toggle') {
@@ -165,7 +165,7 @@ var iotCC = {
                     if ($('span[name="' + widgetId + '"]').exists() == false) {
                         html = '';
                         if (json.widget == 'data-control') html += '<button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="-" class="button button--material btn-xs {class10}">-</button> ';
-                        html += '<span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text {class11}">' + json.value + '</span> ' + (json.valuedescription?'<span class="text {class12}">' + json.valuedescription + '</span>':'') + '';
+                        html += (json.valueprepend?'<span class="text {class12}">' + json.valueprepend + '</span>':'') + ' <span name="' + widgetId + '" data-widget="' + json.widget + '" data-value="' + json.value + '" class="text {class11}">' + json.value + '</span> ' + (json.valueappend?'<span class="text {class13}">' + json.valueappend + '</span>':'');
                         if (json.widget == 'data-control') html += ' <button name="' + widgetId + '" data-widget="' + json.widget + '" data-action="+" class="button button--material btn-xs {class13}">+</button>';
                         json.content = html;
                         json.widgetId = widgetId;
@@ -173,7 +173,7 @@ var iotCC = {
                         json.callback = function() {
                             var action = $(this).data('action');
                             var value = $('span[name="' + $(this).attr('name') + '"]').data('value');
-                            value = action == '+' ? iotCC.formatData(value, json.format) + 1 : iotCC.formatData(value, json.format) - 1;
+                            value = action == '+' ? (iotCC.formatData(value, json.format) + 1) : (iotCC.formatData(value, json.format) - 1);
                             var message = '{"value":"' + value + '"}';
                             iotCC.mqttClient.publish(publishTopic, message, {qos: 1, retained: false});
                             if (iotCC.mqttConfig.debug) {
@@ -280,6 +280,7 @@ var iotCC = {
         }
     },
     addHtml: function(json, html) {
+        html = '<div class="col-md-3 col-sm-6 col-xs-12 widgetcontainer" data-order="{order}" data-template="{template}">' + html + '</div>';
         html = this.parseTemplate(json, html);
         var section = $('section.content').filter('[data-section="dashboard"]');
         // TODO: add after sort ?
@@ -304,7 +305,7 @@ var iotCC = {
     },
     addPage: function(page) {
         $('label').filter('[data-pagination="0"]').parent().removeClass('hide');
-        if ($('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
+        if (page.pageId && $('div').filter('[data-page="' + page.pageId + '"]').exists() == false) {
             var html = '<div class="row page" data-page="' + page.pageId + '" data-order="' + page.order + '"></div>';
             var hidePageContainer = false;
             if ($('label').filter('[data-pagination="0"]').find('input').prop('checked') == false) {
@@ -332,7 +333,7 @@ var iotCC = {
                 }).appendTo('section.content[data-section="dashboard"]');
             }
         }
-        if ($('div.pagination').find('label').filter('[data-pagination="' + page.pageId + '"]').exists() == false) {
+        if (page.pageId && $('div.pagination').find('label').filter('[data-pagination="' + page.pageId + '"]').exists() == false) {
             var html = '<label class="tab-bar__item tab-bar--material__item" data-pagination="' + page.pageId + '" data-order="' + page.order + '">';
             html += '<input type="radio" name="tab-bar-material-a">';
             html += '<button class="tab-bar__button tab-bar--material__button">';
@@ -412,12 +413,13 @@ var iotCC = {
     animate: function(element) {
         element.fadeTo("fast", 0.33 ).fadeTo("fast", 1);
     },
-    formatData: function(v, f, d) {
+    formatData: function(v, f, d = 2) {
         if (f == 'int') {
             return parseInt(v);
         } else if (f == 'float') {
             return parseFloat(v).toFixed(d);
         }
+        return parseInt(v);
     },
     parseTemplate: function(json, html, debug) {
         html = html.replace('{content}', json.content);
@@ -435,6 +437,7 @@ var iotCC = {
         $('.subscriptions-table').find('tr').remove();
         for (i in config.customSubscriptions) {
             var subscription = config.customSubscriptions[i];
+            if (subscription == null) continue;
             var html = '<tr>';
             html += '<td><a href="#" class="btn fa fa-edit"></a><a href="#" class="btn fa fa-remove"></a></td>';
             html += '<td>' + i + '</td>';
@@ -483,6 +486,8 @@ var iotCC = {
         $('.templates-table').find('tr').remove();
         for (i in config.customTemplates) {
             var template = config.customTemplates[i];
+            iotCC.templates[template.title] = template.templateHtml;
+            if (template == null) continue;
             var html = '<tr>';
             html += '<td><a href="#" class="btn fa fa-edit"></a><a href="#" class="btn fa fa-remove"></a></td>';
             html += '<td>' + i + '</td>';
@@ -490,6 +495,7 @@ var iotCC = {
             html += '<td>' + template.active + '</td>';
             html += '</tr>';
             $('.templates-table').append(html);
+            $('#subscriptionTemplate').append('<option value="' + i + '">' + template.title + '</option>');
         }
         $('.templates-table').find('a.fa-edit').click(function(e) {
             e.preventDefault();
@@ -500,6 +506,7 @@ var iotCC = {
             var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
             var data = config.customTemplates || [];
             $('textarea[name="templateHtml"]').val( data[$(tr).find('td:eq(1)').html()].templateHtml );
+            $('textarea[name="templateCallback"]').val( data[$(tr).find('td:eq(1)').html()].templateCallback );
             $("#templateHtml").trigger('keyup');
             iotCC.clearSession();
         });
@@ -681,6 +688,10 @@ $(document).ready(function() {
         }
     });
 
+    $('#subscriptionTemplate').change(function(){
+        $('#widgetJson').trigger('keyup');
+    });
+
     $('#widgetJson').keyup(function() {
         $('.subscriptionWidgetJson-html').remove();
         var val = $('#widgetJson').val();
@@ -693,7 +704,7 @@ $(document).ready(function() {
         } else {
             return;
         }
-        if (json.template) {
+        /*if (json.template) {
             $.ajaxSetup({ cache: false });
             $.get('assets/template/' + json.template + '.html', function(html) {
                 html = iotCC.parseTemplate(json, html, true);
@@ -702,7 +713,16 @@ $(document).ready(function() {
                 $('.box-body.widget-preview').find('.widgetcontainer').replaceWith(template);
                 $('#widgetCodePreview').val(template.trim());
             });
-        }
+        }*/
+        var config = JSON.parse(localStorage.getItem('iotCCConfig')) || {};
+        var data = config.customTemplates || [];
+        config.customTemplates = data;
+        var html = config.customTemplates[$('#subscriptionTemplate').val()].templateHtml;
+        html = iotCC.parseTemplate(json, html, true);
+        $('.box-body.widget-preview').html(html);
+        var template = $('.box-body.widget-preview').find('.widgetcontainer').html();
+        $('.box-body.widget-preview').find('.widgetcontainer').replaceWith(template);
+        $('#widgetCodePreview').val(template.trim());
     });
 
     $('button.beautify').click(function() {

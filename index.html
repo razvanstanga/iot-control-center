@@ -51,12 +51,12 @@
                 </li>
                 <li>
                     <a href="#" class="navigation" data-section="custom-subscriptions">
-                        <i class="fa fa-list"></i> <span>Custom subscriptions</span>
+                        <i class="fa fa-list"></i> <span>Subscriptions</span>
                     </a>
                 </li>
                 <li>
                     <a href="#" class="navigation" data-section="custom-templates">
-                        <i class="fa fa-code"></i> <span>Custom templates</span>
+                        <i class="fa fa-code"></i> <span>Templates</span>
                     </a>
                 </li>
                 <li>
@@ -83,16 +83,16 @@
         </section>
 
         <section class="content-header hide" data-section="custom-subscriptions">
-            <h1>Custom subscriptions</h1>
+            <h1>Subscriptions</h1>
             <ol class="breadcrumb">
-                <li class="active"><i class="fa fa-list"></i> Custom subscriptions</li>
+                <li class="active"><i class="fa fa-list"></i> Subscriptions</li>
             </ol>
         </section>
 
         <section class="content-header hide" data-section="custom-templates">
-            <h1>Custom templates</h1>
+            <h1>Templates</h1>
             <ol class="breadcrumb">
-                <li class="active"><i class="fa fa-code"></i> Custom templates</li>
+                <li class="active"><i class="fa fa-code"></i> Templates</li>
             </ol>
         </section>
 
@@ -177,11 +177,27 @@
                                         <option value="doughnut" data-action="on">Doughnut chart</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="subscriptionTemplate">Template</label>
+                                    <select class="form-control" name="subscriptionTemplate" id="subscriptionTemplate">
+                                        <option>-- select template --</option>
+                                    </select>
+                                </div>
                                 <div class="form-group subscriptionWidgetJson">
-                                    <label for="widgetJson">IoTCC Config</label>
+                                    <label for="widgetJson">Widget JSON</label>
                                     <textarea class="form-control" id="widgetJson" name="widgetJson" placeholder="Widget JSON" rows="10"></textarea>
                                     <button type="button" class="btn btn-primary beautify">Beautify JSON</button>
                                     <span class="help-block widgetJson"></span>
+                                    <span class="help-block widgetJson2">This is the JSON object the IoT device will send to IoT Control Center</span>
+                                </div>
+                                <div class="form-group subscriptionCallback">
+                                    <label for="subscriptionCallback">Callback</label>
+                                    <textarea class="form-control" id="subscriptionCallback" name="subscriptionCallback" placeholder="Subscription callback" rows="10">
+
+
+return json;
+                                    </textarea>
+                                    <span class="help-block subscriptionCallback">This callback is called after receiving a message and is json decoded. You have to `return json;` variabile</span>
                                 </div>
                                 <div class="form-group subscriptionAction hide">
                                     <label for="publishTopic">Widget publish topic</label>
@@ -281,6 +297,11 @@
                                     <label for="templateHtml">HTML</label>
                                     <textarea class="form-control" id="templateHtml" name="templateHtml" placeholder="Template HTML" rows="10"></textarea>
                                     <span class="help-block templateHtml"></span>
+                                </div>
+                                <div class="form-group templateCallback">
+                                    <label for="templateCallback">Callback</label>
+                                    <textarea class="form-control" id="templateCallback" name="templateCallback" placeholder="Template Callback" rows="10"></textarea>
+                                    <span class="help-block templateCallback">This callback is called after the widget is rendered. You can use json, widgetId variables and also jQuery to interact with the template<br />You don't have to return anything.</span>
                                 </div>
                                 <div class="checkbox">
                                     <label for="active2">
@@ -456,9 +477,9 @@
 
     <footer class="main-footer">
         <div class="pull-right hidden-xs">
-            <b>Version</b> 0.3
+            <b>Version</b> 0.5
         </div>
-        <strong>Copyright &copy; 2017 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
+        <strong>Copyright &copy; 2019 <a href="http://www.razvi.ro">Razvan Stanga</a>.</strong> All rights reserved.
     </footer>
 
     <aside class="control-sidebar control-sidebar-dark">
